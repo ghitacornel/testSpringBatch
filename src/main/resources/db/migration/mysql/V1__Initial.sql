@@ -1,0 +1,1 @@
+CREATE TABLE person_mysql (ID INT PRIMARY KEY, name VARCHAR(50), salary DECIMAL(5,2), age int);

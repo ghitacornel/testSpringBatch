@@ -1,0 +1,1 @@
+CREATE TABLE postgresql_database.person_postgresql (ID INT PRIMARY KEY, name VARCHAR(50), salary DECIMAL(5,2), age int);

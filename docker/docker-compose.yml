@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+
+  batch:
+    image: mysql:latest
+    container_name: batch
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_USER=cornel
+      - MYSQL_PASSWORD=sefusefu
+      - MYSQL_ROOT_PASSWORD=sefusefu
+      - MYSQL_DATABASE=batch_database
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_USER=cornel
+      - MYSQL_PASSWORD=sefusefu
+      - MYSQL_ROOT_PASSWORD=sefusefu
+      - MYSQL_DATABASE=mysql_database
+
+  postgres:
+    image: postgres:latest
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=cornel
+      - POSTGRES_PASSWORD=sefusefu
+      - POSTGRES_DB=postgresql_database
