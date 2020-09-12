@@ -42,7 +42,7 @@ public class Step2Configuration {
     @Bean
     public Step step2() throws Exception {
         return stepBuilderFactory.get("step2")
-                .<Step2InputDataModel, PersonMySQL>chunk(2)// check chunk usage
+                .<Step2InputDataModel, PersonMySQL>chunk(100)// check chunk usage
                 .reader(step2ItemReader())
                 .processor(step2ItemProcessor())
                 .writer(step2ItemWriter())

@@ -8,12 +8,12 @@ public class CustomStepListener implements StepExecutionListener {
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
-        System.err.println("start step " + stepExecution);
+        System.err.println(stepExecution);
     }
 
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
-        System.err.println("stop step " + stepExecution);
+        System.err.println(stepExecution);
         return stepExecution.getExitStatus();
     }
 

@@ -44,7 +44,7 @@ public class Step4Configuration {
     @Bean
     public Step step4() {
         return stepBuilderFactory.get("step4")
-                .<PersonPostgreSQL, Step4OutputDataModel>chunk(5)
+                .<PersonPostgreSQL, Step4OutputDataModel>chunk(100)
                 .reader(step4ItemReader())
                 .processor(step4ItemProcessor())
                 .writer(step4ItemWriter())

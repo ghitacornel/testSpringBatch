@@ -9,11 +9,11 @@ public class CustomJobListener extends JobExecutionListenerSupport {
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
-        System.err.println("start job " + jobExecution);
+        System.err.println(jobExecution);
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-        System.err.println("stop job " + jobExecution);
+        System.err.println(jobExecution);
     }
 }

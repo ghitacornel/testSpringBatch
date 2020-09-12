@@ -1,5 +1,6 @@
 package main.batch.steps.step3.configuration;
 
+import main.batch.listeners.CustomChunkListener;
 import main.batch.listeners.CustomStepListener;
 import main.batch.steps.step3.processors.Step3ItemProcessor;
 import main.databases.mysql.domain.PersonMySQL;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
@@ -37,15 +40,21 @@ public class Step3Configuration {
     @Qualifier("postgresqlPTM")
     PlatformTransactionManager platformTransactionManager;
 
+    @Autowired
+    TaskExecutor taskExecutor;
+
     @Bean
     public Step step3() throws Exception {
         return stepBuilderFactory.get("step3")
-                .<PersonMySQL, PersonPostgreSQL>chunk(3)// check chunk usage
+                .<PersonMySQL, PersonPostgreSQL>chunk(50)// check chunk usage
                 .reader(step3ItemReader())
                 .processor(step3ItemProcessor())
                 .writer(step3ItemWriter())
                 .transactionManager(platformTransactionManager)
                 .listener(new CustomStepListener())
+                .listener(new CustomChunkListener())
+                .taskExecutor(taskExecutor)
+                .throttleLimit(5)
                 .build();
     }
 
@@ -54,7 +63,7 @@ public class Step3Configuration {
         JpaPagingItemReader<PersonMySQL> reader = new JpaPagingItemReader<>();
         String query = "select t from PersonMySQL t";
         reader.setEntityManagerFactory(mysqlEMF);
-        reader.setPageSize(3);
+        reader.setPageSize(50);
         reader.setQueryString(query);
         reader.afterPropertiesSet();
         reader.setSaveState(true);
@@ -72,6 +81,11 @@ public class Step3Configuration {
         writer.setEntityManagerFactory(postgresqlEMF);
         writer.afterPropertiesSet();
         return writer;
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor(){
+        return new SimpleAsyncTaskExecutor("spring_batch_thread_executor");
     }
 
 }

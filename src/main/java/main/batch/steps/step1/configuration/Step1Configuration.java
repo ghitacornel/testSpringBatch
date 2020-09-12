@@ -52,7 +52,6 @@ public class Step1Configuration {
                 .fieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
                     setTargetType(Step1InputDataModel.class);
                 }})
-                .linesToSkip(1)
                 .strict(true)
                 .build();
     }
