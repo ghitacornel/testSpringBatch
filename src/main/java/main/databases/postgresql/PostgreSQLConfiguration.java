@@ -31,7 +31,7 @@ public class PostgreSQLConfiguration {
     public LocalContainerEntityManagerFactoryBean postgresqlEMF(EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
 //        map.put("javax.persistence.schema-generation.database.action", "drop-and-create");
-        map.put("javax.persistence.schema-generation.database.action", "validate");
+//        map.put("javax.persistence.schema-generation.database.action", "validate");
         return builder
                 .dataSource(dataSource)
                 .packages("main.databases.postgresql.domain")

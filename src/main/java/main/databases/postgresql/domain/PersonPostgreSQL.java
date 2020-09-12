@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "person_postgresql", schema = "postgresql_database")
@@ -20,7 +21,7 @@ public class PersonPostgreSQL {
     private String name;
 
     @Column(name = "salary")
-    private double salary;
+    private BigDecimal salary;
 
     @Column(name = "age")
     private int age;

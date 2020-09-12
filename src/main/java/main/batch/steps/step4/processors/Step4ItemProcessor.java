@@ -11,7 +11,7 @@ public class Step4ItemProcessor implements ItemProcessor<PersonPostgreSQL, Step4
         Step4OutputDataModel outputDataModel = new Step4OutputDataModel();
         outputDataModel.setId(inputDataModel.getId());
         outputDataModel.setName(inputDataModel.getName());
-        outputDataModel.setSalary(inputDataModel.getSalary());
+        outputDataModel.setSalary(inputDataModel.getSalary().doubleValue());
         outputDataModel.setAge(inputDataModel.getAge());
         return outputDataModel;
     }
