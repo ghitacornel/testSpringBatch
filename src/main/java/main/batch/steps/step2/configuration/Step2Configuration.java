@@ -6,7 +6,6 @@ import main.databases.mysql.domain.PersonMySQL;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.json.JacksonJsonObjectReader;
 import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
@@ -38,10 +37,14 @@ public class Step2Configuration {
     String step2InputFile;
 
     @Bean
-    public Step step2() throws Exception {
+    public Step step2() {
         return stepBuilderFactory.get("step2")
                 .<Step2InputDataModel, PersonMySQL>chunk(100)// check chunk usage
-                .reader(step2ItemReader())
+                .reader(new JsonItemReaderBuilder<Step2InputDataModel>()
+                        .jsonObjectReader(new JacksonJsonObjectReader<>(Step2InputDataModel.class))
+                        .resource(new FileSystemResource(step2InputFile))
+                        .name("step 2 reader")
+                        .build())
                 .processor((ItemProcessor<Step2InputDataModel, PersonMySQL>) input -> {
                     PersonMySQL output = new PersonMySQL();
                     output.setId(input.getId());
@@ -55,16 +58,6 @@ public class Step2Configuration {
                         .build())
                 .transactionManager(platformTransactionManager)
                 .listener(new CustomStepListener())
-                .build();
-    }
-
-    @Bean
-    public ItemReader<Step2InputDataModel> step2ItemReader() {
-        return new JsonItemReaderBuilder<Step2InputDataModel>()
-                .jsonObjectReader(new JacksonJsonObjectReader(Step2InputDataModel.class))
-                .resource(new FileSystemResource(step2InputFile))
-                .name("step2ItemReader")
-                .strict(true)
                 .build();
     }
 
