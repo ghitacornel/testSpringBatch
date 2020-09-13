@@ -44,7 +44,7 @@ public class Step3Configuration {
                 .reader(new JpaPagingItemReaderBuilder<PersonMySQL>()
                         .entityManagerFactory(mysqlEMF)
                         .pageSize(50)
-                        .name("step 3 item reader")
+                        .name("step 3 reader")
                         .queryString("select t from PersonMySQL t")
                         .build())
                 .processor((ItemProcessor<PersonMySQL, PersonPostgreSQL>) inputDataModel -> {

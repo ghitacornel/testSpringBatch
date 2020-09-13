@@ -2,15 +2,12 @@ package main.batch.steps.step4.configuration;
 
 import main.batch.listeners.CustomStepListener;
 import main.batch.steps.step4.model.Step4OutputDataModel;
-import main.batch.steps.step4.processors.Step4ItemProcessor;
 import main.databases.postgresql.domain.PersonPostgreSQL;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.item.xml.StaxEventItemWriter;
+import org.springframework.batch.item.xml.builder.StaxEventItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,47 +34,36 @@ public class Step4Configuration {
     @Qualifier("dataSourcePostgreSQL")
     DataSource dataSource;
 
-    @Autowired
-    Jaxb2Marshaller marshaller;
-
     @Bean
-    public Step step4() {
+    public Step step4() throws Exception {
         return stepBuilderFactory.get("step4")
                 .<PersonPostgreSQL, Step4OutputDataModel>chunk(100)
-                .reader(step4ItemReader())
-                .processor(step4ItemProcessor())
-                .writer(step4ItemWriter())
+                .reader(new JdbcCursorItemReaderBuilder<PersonPostgreSQL>()
+                        .dataSource(dataSource)
+                        .sql("select * from postgresql_database.person_postgresql order by id")
+                        .fetchSize(50)
+                        .rowMapper(new BeanPropertyRowMapper<>(PersonPostgreSQL.class))
+                        .name("step 4 reader")
+                        .build())
+                .processor((ItemProcessor<PersonPostgreSQL, Step4OutputDataModel>) input -> {
+                    Step4OutputDataModel output = new Step4OutputDataModel();
+                    output.setId(input.getId());
+                    output.setName(input.getName());
+                    output.setSalary(input.getSalary().doubleValue());
+                    output.setAge(input.getAge());
+                    return output;
+                })
+                .writer(new StaxEventItemWriterBuilder<Step4OutputDataModel>()
+                        .resource(new FileSystemResource(step4OutputFile))
+                        .marshaller(marshaller())
+                        .rootTagName("root-tag-name")
+                        .name("step 4 writer")
+                        .build())
                 .listener(new CustomStepListener())
                 .build();
     }
 
-    @Bean
-    public ItemReader<PersonPostgreSQL> step4ItemReader() {
-        return new JdbcCursorItemReaderBuilder<PersonPostgreSQL>()
-                .name("step4ItemReader")
-                .dataSource(dataSource)
-                .sql("select * from postgresql_database.person_postgresql")
-                .fetchSize(1)
-                .rowMapper(new BeanPropertyRowMapper<>(PersonPostgreSQL.class))
-                .build();
-    }
-
-    @Bean
-    public ItemProcessor<PersonPostgreSQL, Step4OutputDataModel> step4ItemProcessor() {
-        return new Step4ItemProcessor();
-    }
-
-    @Bean
-    public ItemWriter<Step4OutputDataModel> step4ItemWriter() {
-        StaxEventItemWriter<Step4OutputDataModel> staxEventItemWriter = new StaxEventItemWriter<>();
-        staxEventItemWriter.setResource(new FileSystemResource(step4OutputFile));
-        staxEventItemWriter.setMarshaller(marshaller);
-        staxEventItemWriter.setRootTagName("root-tag-name");
-        return staxEventItemWriter;
-    }
-
-    @Bean
-    public Jaxb2Marshaller marshaller() throws Exception {
+    private static Jaxb2Marshaller marshaller() throws Exception {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setClassesToBeBound(Step4OutputDataModel.class);
         Map<String, Object> map = new HashMap<>();
