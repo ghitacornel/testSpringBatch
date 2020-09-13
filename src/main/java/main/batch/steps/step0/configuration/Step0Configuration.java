@@ -31,7 +31,7 @@ public class Step0Configuration {
         return stepBuilderFactory.get("step0")
                 .<DummyData, DummyData>chunk(100)
                 .reader(() -> {
-                    if (count > 1000) return null;
+                    if (count >= 1000) return null;
                     count++;
                     DummyData dummyData = new DummyData();
                     dummyData.setId(count);

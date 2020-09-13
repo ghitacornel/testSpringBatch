@@ -20,7 +20,7 @@ public class BatchConfiguration {
     JobBuilderFactory jobBuilderFactory;
 
     @Bean
-    public Job mainJob(CustomJobListener listener, Step step0, Step step1, Step step2, Step step3, Step step4) {
+    public Job mainJob(CustomJobListener listener, Step step0, Step step1, Step step2, Step step3, Step step4, Step step5) {
         return jobBuilderFactory.get("mainJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
@@ -29,6 +29,7 @@ public class BatchConfiguration {
                 .next(step2)
                 .next(step3)
                 .next(step4)
+                .next(step5)
                 .end()
                 .build();
     }
