@@ -45,7 +45,6 @@ public class Step0Configuration {
                 })
                 .writer(new FlatFileItemWriterBuilder<DummyData>()
                         .resource(new FileSystemResource(step0OutputFile))
-                        .append(true)
                         .lineAggregator(new DelimitedLineAggregator<>() {
                             {
                                 setDelimiter(",");

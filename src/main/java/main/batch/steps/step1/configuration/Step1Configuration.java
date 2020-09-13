@@ -40,7 +40,6 @@ public class Step1Configuration {
                         .fieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
                             setTargetType(Step1InputDataModel.class);
                         }})
-                        .strict(true)
                         .build())
                 .processor((ItemProcessor<Step1InputDataModel, Step1OutputDataModel>) input -> {
                     Step1OutputDataModel output = new Step1OutputDataModel();
