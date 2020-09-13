@@ -2,14 +2,12 @@ package main.batch.steps.step2.configuration;
 
 import main.batch.listeners.CustomStepListener;
 import main.batch.steps.step2.model.Step2InputDataModel;
-import main.batch.steps.step2.processors.Step2ItemProcessor;
 import main.databases.mysql.domain.PersonMySQL;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.json.JacksonJsonObjectReader;
 import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +42,17 @@ public class Step2Configuration {
         return stepBuilderFactory.get("step2")
                 .<Step2InputDataModel, PersonMySQL>chunk(100)// check chunk usage
                 .reader(step2ItemReader())
-                .processor(step2ItemProcessor())
-                .writer(step2ItemWriter())
+                .processor((ItemProcessor<Step2InputDataModel, PersonMySQL>) input -> {
+                    PersonMySQL output = new PersonMySQL();
+                    output.setId(input.getId());
+                    output.setName(input.getName());
+                    output.setSalary(input.getSalary());
+                    output.setAge(input.getAge());
+                    return output;
+                })
+                .writer(new JpaItemWriterBuilder<PersonMySQL>()
+                        .entityManagerFactory(entityManagerFactory)
+                        .build())
                 .transactionManager(platformTransactionManager)
                 .listener(new CustomStepListener())
                 .build();
@@ -59,19 +66,6 @@ public class Step2Configuration {
                 .name("step2ItemReader")
                 .strict(true)
                 .build();
-    }
-
-    @Bean
-    public ItemProcessor<Step2InputDataModel, PersonMySQL> step2ItemProcessor() {
-        return new Step2ItemProcessor();
-    }
-
-    @Bean
-    public ItemWriter<PersonMySQL> step2ItemWriter() throws Exception {
-        JpaItemWriter<PersonMySQL> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(entityManagerFactory);
-        writer.afterPropertiesSet();
-        return writer;
     }
 
 }

@@ -72,7 +72,7 @@ public class Step0Configuration {
                         });
                     }
                 })
-                .name("step 0 item writer")
+                .name("step 0 writer")
                 .build();
     }
 

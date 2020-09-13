@@ -3,12 +3,9 @@ package main.batch.steps.step1.configuration;
 import main.batch.listeners.CustomStepListener;
 import main.batch.steps.step1.model.Step1InputDataModel;
 import main.batch.steps.step1.model.Step1OutputDataModel;
-import main.batch.steps.step1.processors.Step1ItemProcessor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.json.JacksonJsonObjectMarshaller;
@@ -35,38 +32,31 @@ public class Step1Configuration {
     public Step step1() {
         return stepBuilderFactory.get("step1")
                 .<Step1InputDataModel, Step1OutputDataModel>chunk(100)
-                .reader(step1ItemReader())
-                .processor(step1ItemProcessor())
-                .writer(step1ItemWriter())
+                .reader(new FlatFileItemReaderBuilder<Step1InputDataModel>()
+                        .name("step 1 reader")
+                        .resource(new FileSystemResource(step1InputFile))
+                        .delimited()
+                        .names(new String[]{"id", "name", "salary", "age"})
+                        .fieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
+                            setTargetType(Step1InputDataModel.class);
+                        }})
+                        .strict(true)
+                        .build())
+                .processor((ItemProcessor<Step1InputDataModel, Step1OutputDataModel>) input -> {
+                    Step1OutputDataModel output = new Step1OutputDataModel();
+                    output.setId(input.getId());
+                    output.setName(input.getName());
+                    output.setSalary(input.getSalary());
+                    output.setAge(input.getAge());
+                    return output;
+                })
+                .writer(new JsonFileItemWriterBuilder<Step1OutputDataModel>()
+                        .name("step 1 writer")
+                        .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
+                        .resource(new FileSystemResource(step1OutputFile))
+                        .append(false)
+                        .build())
                 .listener(new CustomStepListener())
-                .build();
-    }
-
-    @Bean
-    public ItemReader<Step1InputDataModel> step1ItemReader() {
-        return new FlatFileItemReaderBuilder<Step1InputDataModel>()
-                .name("step1ItemReader")
-                .resource(new FileSystemResource(step1InputFile))
-                .delimited()
-                .names(new String[]{"id", "name", "salary", "age"})
-                .fieldSetMapper(new BeanWrapperFieldSetMapper<>() {{
-                    setTargetType(Step1InputDataModel.class);
-                }})
-                .strict(true)
-                .build();
-    }
-
-    @Bean
-    public ItemProcessor<Step1InputDataModel, Step1OutputDataModel> step1ItemProcessor() {
-        return new Step1ItemProcessor();
-    }
-
-    @Bean
-    public ItemWriter<Step1OutputDataModel> step1ItemWriter() {
-        return new JsonFileItemWriterBuilder<Step1OutputDataModel>()
-                .name("step1ItemWriter")
-                .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
-                .resource(new FileSystemResource(step1OutputFile))
                 .build();
     }
 
