@@ -7,7 +7,7 @@ import org.springframework.batch.item.ItemProcessor;
 public class Step2ItemProcessor implements ItemProcessor<Step2InputDataModel, PersonMySQL> {
 
     @Override
-    public PersonMySQL process(Step2InputDataModel inputDataModel) throws Exception {
+    public PersonMySQL process(Step2InputDataModel inputDataModel) {
         PersonMySQL outputDataModel = new PersonMySQL();
         outputDataModel.setId(inputDataModel.getId());
         outputDataModel.setName(inputDataModel.getName());

@@ -1,8 +1,8 @@
 package main.batch.steps.step0.configuration;
 
+import com.github.javafaker.Faker;
 import main.batch.listeners.CustomStepListener;
 import main.batch.steps.step0.model.DummyData;
-import main.batch.steps.step0.processors.Step0ItemProcessor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -50,7 +50,12 @@ public class Step0Configuration {
     }
 
     private ItemProcessor<DummyData, DummyData> processor() {
-        return new Step0ItemProcessor();
+        return item -> {
+            item.setAge(new Faker().number().numberBetween(20, 50));
+            item.setSalary(new Faker().number().randomDouble(2, 500, 5000));
+            item.setName(new Faker().name().fullName());
+            return item;
+        };
     }
 
     private FlatFileItemWriter<DummyData> writer() {

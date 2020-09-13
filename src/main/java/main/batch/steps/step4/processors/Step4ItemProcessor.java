@@ -7,7 +7,7 @@ import org.springframework.batch.item.ItemProcessor;
 public class Step4ItemProcessor implements ItemProcessor<PersonPostgreSQL, Step4OutputDataModel> {
 
     @Override
-    public Step4OutputDataModel process(PersonPostgreSQL inputDataModel) throws Exception {
+    public Step4OutputDataModel process(PersonPostgreSQL inputDataModel) {
         Step4OutputDataModel outputDataModel = new Step4OutputDataModel();
         outputDataModel.setId(inputDataModel.getId());
         outputDataModel.setName(inputDataModel.getName());

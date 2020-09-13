@@ -21,7 +21,6 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import javax.sql.DataSource;
-import javax.xml.bind.Marshaller;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,8 +81,8 @@ public class Step4Configuration {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
         marshaller.setClassesToBeBound(Step4OutputDataModel.class);
         Map<String, Object> map = new HashMap<>();
-        map.put("jaxb.formatted.output", true);
-        map.put(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, true);
+//        map.put("jaxb.formatted.output", true);
+//        map.put(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setMarshallerProperties(map);
         marshaller.afterPropertiesSet();
         return marshaller;

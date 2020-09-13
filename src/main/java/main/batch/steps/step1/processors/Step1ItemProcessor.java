@@ -8,7 +8,7 @@ import org.springframework.batch.item.ItemProcessor;
 public class Step1ItemProcessor implements ItemProcessor<Step1InputDataModel, Step1OutputDataModel> {
 
     @Override
-    public Step1OutputDataModel process(Step1InputDataModel inputDataModel) throws Exception {
+    public Step1OutputDataModel process(Step1InputDataModel inputDataModel) {
         Step1OutputDataModel outputDataModel = new Step1OutputDataModel();
         outputDataModel.setId(inputDataModel.getId());
         outputDataModel.setName(inputDataModel.getName());
