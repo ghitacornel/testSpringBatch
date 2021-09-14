@@ -10,9 +10,9 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfiguration {
 
-    @Primary// default one to use by Spring Batch database
-    @Bean(name = "dataSource")
-    public DataSource dataSource() {
+    @Primary// the default data source to be used by Spring Batch
+    @Bean(name = "dataSource")// mandatory name "dataSource"
+    public DataSource defaultDataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
         dataSourceBuilder.url("jdbc:mysql://localhost:3307/batch_database");
@@ -21,7 +21,7 @@ public class DataSourceConfiguration {
         return dataSourceBuilder.build();
     }
 
-    @Bean(name = "dataSourceMySQL")
+    @Bean
     public DataSource dataSourceMySQL() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
@@ -31,7 +31,7 @@ public class DataSourceConfiguration {
         return dataSourceBuilder.build();
     }
 
-    @Bean(name = "dataSourcePostgreSQL")
+    @Bean
     public DataSource dataSourcePostgreSQL() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("org.postgresql.Driver");
