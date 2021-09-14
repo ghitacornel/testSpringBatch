@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@EnableBatchProcessing
 @PropertySource("classpath:batch.properties")
 public class BatchConfiguration {
 
