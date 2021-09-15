@@ -14,7 +14,7 @@ public class DataSourceConfiguration {
     // Spring batch always needs at least 1 data source
     @Primary
     @Bean(name = "dataSource")// mandatory name "dataSource"
-    public DataSource defaultDataSource() {
+    public DataSource dataSourceBatch() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
         dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
         dataSourceBuilder.url("jdbc:mysql://localhost:3307/batch_database");
