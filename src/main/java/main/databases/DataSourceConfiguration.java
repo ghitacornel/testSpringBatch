@@ -10,7 +10,9 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfiguration {
 
-    @Primary// the default data source to be used by Spring Batch
+    // the default data source to be used by Spring Batch
+    // Spring batch always needs at least 1 data source
+    @Primary
     @Bean(name = "dataSource")// mandatory name "dataSource"
     public DataSource defaultDataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
