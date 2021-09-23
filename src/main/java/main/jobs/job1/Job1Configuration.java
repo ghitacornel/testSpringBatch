@@ -22,22 +22,23 @@ public class Job1Configuration {
     StepBuilderFactory steps;
 
     @Bean
-    public Job simpleJobTaskletJob(Job1ExecutionListener job1ExecutionListener) {
+    public Job simpleJobTaskletJob(Job1ExecutionListener job1ExecutionListener, Job1StepExecutionListener job1StepExecutionListener) {
         return jobBuilderFactory.get("job1")
                 .incrementer(new RunIdIncrementer())
-                .start(step1())
+                .start(step1(job1StepExecutionListener))
                 .next(step2())
                 .listener(job1ExecutionListener)
                 .build();
     }
 
-    Step step1() {
+    Step step1(Job1StepExecutionListener job1StepExecutionListener) {
         return steps
                 .get("singleExecutionStep")
                 .tasklet((contribution, chunkContext) -> {
                     System.out.println("single execution step");
                     return RepeatStatus.FINISHED;
                 })
+                .listener(job1StepExecutionListener)
                 .build();
     }
 

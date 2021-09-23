@@ -13,6 +13,9 @@ public class Job1ConfigurationTest extends TestsConfiguration {
     @Autowired
     Job1ExecutionListener job1ExecutionListener;
 
+    @Autowired
+    Job1StepExecutionListener job1StepExecutionListener;
+
     @Test
     public void testJob() throws Exception {
 
@@ -45,6 +48,8 @@ public class Job1ConfigurationTest extends TestsConfiguration {
         // check listeners
         Assertions.assertTrue(job1ExecutionListener.beforeExecuted);
         Assertions.assertTrue(job1ExecutionListener.afterExecuted);
+        Assertions.assertTrue(job1StepExecutionListener.beforeExecuted);
+        Assertions.assertTrue(job1StepExecutionListener.afterExecuted);
 
     }
 }
