@@ -1,6 +1,8 @@
 package main.jobs.job1;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -20,11 +22,12 @@ public class Job1Configuration {
     StepBuilderFactory steps;
 
     @Bean
-    public Job simpleJobTaskletJob() {
+    public Job simpleJobTaskletJob(Job1ExecutionListener job1ExecutionListener) {
         return jobBuilderFactory.get("job1")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .next(step2())
+                .listener(job1ExecutionListener)
                 .build();
     }
 

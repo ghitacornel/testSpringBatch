@@ -4,10 +4,14 @@ import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Iterator;
 
 public class Job1ConfigurationTest extends TestsConfiguration {
+
+    @Autowired
+    Job1ExecutionListener job1ExecutionListener;
 
     @Test
     public void testJob() throws Exception {
@@ -37,6 +41,10 @@ public class Job1ConfigurationTest extends TestsConfiguration {
 
         // no more steps
         Assertions.assertFalse(stepExecutionIterator.hasNext());
+
+        // check listeners
+        Assertions.assertTrue(job1ExecutionListener.beforeExecuted);
+        Assertions.assertTrue(job1ExecutionListener.afterExecuted);
 
     }
 }
