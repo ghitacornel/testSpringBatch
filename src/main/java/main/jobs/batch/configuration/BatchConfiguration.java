@@ -18,7 +18,7 @@ public class BatchConfiguration {
     @Autowired
     JobBuilderFactory jobBuilderFactory;
 
-    @Bean
+//    @Bean
     public Job mainJob(CustomJobListener listener, Step step0, Step step1, Step step2, Step step3, Step step4, Step step5) {
         return jobBuilderFactory.get("mainJob")
                 .incrementer(new RunIdIncrementer())
