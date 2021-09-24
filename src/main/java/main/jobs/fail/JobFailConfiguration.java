@@ -32,6 +32,27 @@ public class JobFailConfiguration {
         return steps
                 .get("stepFail")
                 .tasklet((contribution, chunkContext) -> {
+
+                    contribution.incrementReadCount();
+
+                    contribution.incrementReadSkipCount();
+                    contribution.incrementReadSkipCount();
+
+                    contribution.incrementWriteCount(3);
+                    contribution.incrementWriteSkipCount();
+                    contribution.incrementWriteSkipCount();
+                    contribution.incrementWriteSkipCount();
+                    contribution.incrementWriteSkipCount();
+
+                    contribution.incrementFilterCount(5);
+
+                    contribution.incrementProcessSkipCount();
+                    contribution.incrementProcessSkipCount();
+                    contribution.incrementProcessSkipCount();
+                    contribution.incrementProcessSkipCount();
+                    contribution.incrementProcessSkipCount();
+                    contribution.incrementProcessSkipCount();
+
                     throw new RuntimeException("step that must fail");
                 })
                 .build();

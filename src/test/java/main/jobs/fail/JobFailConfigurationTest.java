@@ -30,12 +30,13 @@ public class JobFailConfigurationTest extends TestsConfiguration {
         Assertions.assertEquals(stepFail.getExitStatus().getExitCode(), ExitStatus.FAILED.getExitCode());
         Assertions.assertTrue(stepFail.getExitStatus().getExitDescription().startsWith("java.lang.RuntimeException: step that must fail"));
         Assertions.assertEquals(stepFail.getStepName(), "stepFail");
-        Assertions.assertEquals(stepFail.getReadCount(), 0);
-        Assertions.assertEquals(stepFail.getReadSkipCount(), 0);
-        Assertions.assertEquals(stepFail.getWriteCount(), 0);
-        Assertions.assertEquals(stepFail.getWriteSkipCount(), 0);
-        Assertions.assertEquals(stepFail.getFilterCount(), 0);
-        Assertions.assertEquals(stepFail.getSkipCount(), 0);
+        Assertions.assertEquals(stepFail.getReadCount(), 1);
+        Assertions.assertEquals(stepFail.getReadSkipCount(), 2);
+        Assertions.assertEquals(stepFail.getWriteCount(), 3);
+        Assertions.assertEquals(stepFail.getWriteSkipCount(), 4);
+        Assertions.assertEquals(stepFail.getFilterCount(), 5);
+
+        Assertions.assertEquals(stepFail.getSkipCount(), 12);// 2 reads skips + 4 writes skips + 6 process skips
         Assertions.assertEquals(stepFail.getCommitCount(), 0);
 
         // no more steps
