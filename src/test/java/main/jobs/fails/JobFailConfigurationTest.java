@@ -23,6 +23,11 @@ public class JobFailConfigurationTest extends TestsConfiguration {
         Assertions.assertEquals(jobInstance.getJobName(), "jobFail");
         Assertions.assertEquals(exitStatus.getExitCode(), "FAILED");
 
+        Assertions.assertEquals(jobExecution.getFailureExceptions().size(), 0);
+
+        Assertions.assertEquals(jobExecution.getAllFailureExceptions().size(), 1);
+        Assertions.assertEquals(jobExecution.getAllFailureExceptions().get(0).getMessage(), "step that must fail");
+
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
         // test stepFail
