@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Iterator;
 
+@ActiveProfiles("job1")
 public class Job1ConfigurationTest extends TestsConfiguration {
 
     @Autowired
@@ -41,6 +43,13 @@ public class Job1ConfigurationTest extends TestsConfiguration {
         StepExecution repeatableExecutionStep = stepExecutionIterator.next();
         Assertions.assertEquals(repeatableExecutionStep.getExitStatus(), ExitStatus.COMPLETED);
         Assertions.assertEquals(repeatableExecutionStep.getStepName(), "repeatableExecutionStep");
+        Assertions.assertEquals(repeatableExecutionStep.getReadCount(), 0);
+        Assertions.assertEquals(repeatableExecutionStep.getReadSkipCount(), 0);
+        Assertions.assertEquals(repeatableExecutionStep.getWriteCount(), 0);
+        Assertions.assertEquals(repeatableExecutionStep.getWriteSkipCount(), 0);
+        Assertions.assertEquals(repeatableExecutionStep.getFilterCount(), 0);
+        Assertions.assertEquals(repeatableExecutionStep.getSkipCount(), 0);
+        Assertions.assertEquals(repeatableExecutionStep.getCommitCount(), 4);
 
         // no more steps
         Assertions.assertFalse(stepExecutionIterator.hasNext());
