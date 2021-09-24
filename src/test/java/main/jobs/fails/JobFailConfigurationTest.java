@@ -1,4 +1,4 @@
-package main.jobs.fail;
+package main.jobs.fails;
 
 import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;

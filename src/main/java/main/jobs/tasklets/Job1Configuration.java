@@ -1,4 +1,4 @@
-package main.jobs.job1;
+package main.jobs.tasklets;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

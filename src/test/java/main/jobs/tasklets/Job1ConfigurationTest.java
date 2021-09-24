@@ -1,4 +1,4 @@
-package main.jobs.job1;
+package main.jobs.tasklets;
 
 import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;

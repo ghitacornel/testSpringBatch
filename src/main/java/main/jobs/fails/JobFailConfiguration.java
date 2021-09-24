@@ -1,4 +1,4 @@
-package main.jobs.fail;
+package main.jobs.fails;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

@@ -1,4 +1,4 @@
-package main.jobs.job1;
+package main.jobs.tasklets;
 
 import org.springframework.batch.core.*;
 import org.springframework.stereotype.Component;
