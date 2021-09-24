@@ -37,7 +37,12 @@ public class Job1ConfigurationTest extends TestsConfiguration {
         Assertions.assertEquals(singleExecutionStep.getExitStatus(), ExitStatus.COMPLETED);
         Assertions.assertEquals(singleExecutionStep.getStepName(), "singleExecutionStep");
         Assertions.assertEquals(singleExecutionStep.getReadCount(), 0);
+        Assertions.assertEquals(singleExecutionStep.getReadSkipCount(), 0);
         Assertions.assertEquals(singleExecutionStep.getWriteCount(), 0);
+        Assertions.assertEquals(singleExecutionStep.getWriteSkipCount(), 0);
+        Assertions.assertEquals(singleExecutionStep.getFilterCount(), 0);
+        Assertions.assertEquals(singleExecutionStep.getSkipCount(), 0);
+        Assertions.assertEquals(singleExecutionStep.getCommitCount(), 1);
 
         // test repeatableExecutionStep
         StepExecution repeatableExecutionStep = stepExecutionIterator.next();
