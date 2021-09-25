@@ -34,24 +34,23 @@ public class JobCsvReadWrite {
     StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job job(@Qualifier("main.jobs.csv.JobCsvReadWrite.step") Step step) {
+    public Job job(Step step) {
         return jobBuilderFactory.get("main.jobs.csv.JobCsvReadWrite")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
     }
 
-    @Bean("main.jobs.csv.JobCsvReadWrite.step")
+    @Bean
     @StepScope
-    public Step step(@Qualifier("main.jobs.csv.JobCsvReadWrite.step.reader") ItemReader<Employee> reader,
-                     @Qualifier("main.jobs.csv.JobCsvReadWrite.step.writer") ItemWriter<Employee> writer) {
+    public Step step(ItemReader<Employee> reader, ItemWriter<Employee> writer) {
         return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step").<Employee, Employee>chunk(5)
                 .reader(reader)
                 .writer(writer)
                 .build();
     }
 
-    @Bean("main.jobs.csv.JobCsvReadWrite.step.reader")
+    @Bean
     @StepScope
     public FlatFileItemReader<Employee> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<Employee> reader = new FlatFileItemReader<>();
@@ -74,7 +73,7 @@ public class JobCsvReadWrite {
         return reader;
     }
 
-    @Bean("main.jobs.csv.JobCsvReadWrite.step.writer")
+    @Bean
     @StepScope
     public FlatFileItemWriter<Employee> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<Employee> writer = new FlatFileItemWriter<>();
