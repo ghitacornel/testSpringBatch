@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("jobFail")
+@Profile("main.jobs.fails.JobTaskletFailConfiguration")
 @Configuration
-public class JobFailConfiguration {
+public class JobTaskletFailConfiguration {
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;

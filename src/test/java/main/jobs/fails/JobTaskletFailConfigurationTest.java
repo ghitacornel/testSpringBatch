@@ -8,8 +8,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Iterator;
 
-@ActiveProfiles("jobFail")
-public class JobFailConfigurationTest extends TestsConfiguration {
+@ActiveProfiles("main.jobs.fails.JobTaskletFailConfiguration")
+public class JobTaskletFailConfigurationTest extends TestsConfiguration {
 
     @Test
     public void testJob() throws Exception {
@@ -20,7 +20,7 @@ public class JobFailConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "jobFail");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.fails.JobTaskletFailConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "FAILED");
 
         Assertions.assertEquals(jobExecution.getFailureExceptions().size(), 0);
