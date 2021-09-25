@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("job1")
+@Profile("main.jobs.tasklets.JobTaskletConfiguration")
 @Configuration
-public class Job1Configuration {
+public class JobTaskletConfiguration {
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;
@@ -22,23 +22,23 @@ public class Job1Configuration {
     StepBuilderFactory steps;
 
     @Bean
-    public Job job1(Job1ExecutionListener job1ExecutionListener, Job1StepExecutionListener job1StepExecutionListener) {
-        return jobBuilderFactory.get("job1")
+    public Job job1(JobTaskletExecutionListener job1ExecutionListener, JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
+        return jobBuilderFactory.get("main.jobs.tasklets.JobTaskletConfiguration")
                 .incrementer(new RunIdIncrementer())
-                .start(step1(job1StepExecutionListener))
+                .start(step1(jobTaskletStepExecutionListener))
                 .next(step2())
                 .listener(job1ExecutionListener)
                 .build();
     }
 
-    Step step1(Job1StepExecutionListener job1StepExecutionListener) {
+    Step step1(JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
         return steps
                 .get("singleExecutionStep")
                 .tasklet((contribution, chunkContext) -> {
                     System.out.println("single execution step");
                     return RepeatStatus.FINISHED;
                 })
-                .listener(job1StepExecutionListener)
+                .listener(jobTaskletStepExecutionListener)
                 .build();
     }
 

@@ -4,7 +4,7 @@ import org.springframework.batch.core.*;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Job1StepExecutionListener implements StepExecutionListener {
+public class JobTaskletStepExecutionListener implements StepExecutionListener {
 
     boolean beforeExecuted;
     boolean afterExecuted;

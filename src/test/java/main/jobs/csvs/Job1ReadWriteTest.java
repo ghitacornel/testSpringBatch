@@ -1,9 +1,8 @@
 package main.jobs.csvs;
 
 import main.jobs.TestsConfiguration;
-import main.jobs.tasklets.Job1ExecutionListener;
-import main.jobs.tasklets.Job1StepExecutionListener;
-import org.assertj.core.api.FileAssert;
+import main.jobs.tasklets.JobTaskletExecutionListener;
+import main.jobs.tasklets.JobTaskletStepExecutionListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,10 +22,10 @@ import java.util.Iterator;
 public class Job1ReadWriteTest extends TestsConfiguration {
 
     @Autowired
-    Job1ExecutionListener job1ExecutionListener;
+    JobTaskletExecutionListener job1ExecutionListener;
 
     @Autowired
-    Job1StepExecutionListener job1StepExecutionListener;
+    JobTaskletStepExecutionListener jobTaskletStepExecutionListener;
 
     @TempDir
     Path workingFolder;

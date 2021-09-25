@@ -9,14 +9,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Iterator;
 
-@ActiveProfiles("job1")
-public class Job1ConfigurationTest extends TestsConfiguration {
+@ActiveProfiles("main.jobs.tasklets.JobTaskletConfiguration")
+public class JobTaskletConfigurationTest extends TestsConfiguration {
 
     @Autowired
-    Job1ExecutionListener job1ExecutionListener;
+    JobTaskletExecutionListener jobExecutionListener;
 
     @Autowired
-    Job1StepExecutionListener job1StepExecutionListener;
+    JobTaskletStepExecutionListener stepExecutionListener;
 
     @Test
     public void testJob() throws Exception {
@@ -27,7 +27,7 @@ public class Job1ConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "job1");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.tasklets.JobTaskletConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -60,10 +60,10 @@ public class Job1ConfigurationTest extends TestsConfiguration {
         Assertions.assertFalse(stepExecutionIterator.hasNext());
 
         // check listeners
-        Assertions.assertTrue(job1ExecutionListener.beforeExecuted);
-        Assertions.assertTrue(job1ExecutionListener.afterExecuted);
-        Assertions.assertTrue(job1StepExecutionListener.beforeExecuted);
-        Assertions.assertTrue(job1StepExecutionListener.afterExecuted);
+        Assertions.assertTrue(jobExecutionListener.beforeExecuted);
+        Assertions.assertTrue(jobExecutionListener.afterExecuted);
+        Assertions.assertTrue(stepExecutionListener.beforeExecuted);
+        Assertions.assertTrue(stepExecutionListener.afterExecuted);
 
     }
 }
