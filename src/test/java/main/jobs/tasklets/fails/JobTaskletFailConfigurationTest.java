@@ -1,4 +1,4 @@
-package main.jobs.fails;
+package main.jobs.tasklets.fails;
 
 import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.fails.JobTaskletFailConfiguration")
+@ActiveProfiles("main.jobs.tasklets.fails.JobTaskletFailConfiguration")
 public class JobTaskletFailConfigurationTest extends TestsConfiguration {
 
     @Test
@@ -20,7 +20,7 @@ public class JobTaskletFailConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.fails.JobTaskletFailConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.tasklets.fails.JobTaskletFailConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "FAILED");
 
         Assertions.assertEquals(jobExecution.getFailureExceptions().size(), 0);

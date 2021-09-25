@@ -1,4 +1,4 @@
-package main.jobs.fails;
+package main.jobs.tasklets.fails;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("main.jobs.fails.JobTaskletFailConfiguration")
+@Profile("main.jobs.tasklets.fails.JobTaskletFailConfiguration")
 @Configuration
 public class JobTaskletFailConfiguration {
 
@@ -22,7 +22,7 @@ public class JobTaskletFailConfiguration {
 
     @Bean
     public Job jobFail() {
-        return jobBuilderFactory.get("main.jobs.fails.JobTaskletFailConfiguration")
+        return jobBuilderFactory.get("main.jobs.tasklets.fails.JobTaskletFailConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(stepFail())
                 .build();
