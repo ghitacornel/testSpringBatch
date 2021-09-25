@@ -42,7 +42,6 @@ public class JobCsvReadWrite {
     }
 
     @Bean
-    @StepScope
     public Step step(ItemReader<Employee> reader, ItemWriter<Employee> writer) {
         return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step").<Employee, Employee>chunk(5)
                 .reader(reader)
