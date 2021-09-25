@@ -22,7 +22,7 @@ public class JobTaskletFailConfiguration {
 
     @Bean
     public Job jobFail() {
-        return jobBuilderFactory.get("jobFail")
+        return jobBuilderFactory.get("main.jobs.fails.JobTaskletFailConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(stepFail())
                 .build();
