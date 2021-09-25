@@ -6,6 +6,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -45,6 +46,7 @@ public class JobCsvReadWrite {
     public Step step(ItemReader<Employee> reader, ItemWriter<Employee> writer) {
         return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step").<Employee, Employee>chunk(5)
                 .reader(reader)
+                .processor(processor())
                 .writer(writer)
                 .build();
     }
@@ -59,7 +61,7 @@ public class JobCsvReadWrite {
             {
                 setLineTokenizer(new DelimitedLineTokenizer() {
                     {
-                        setNames("id", "firstName", "lastName");
+                        setNames("id", "firstName", "lastName", "age", "salary");
                     }
                 });
                 setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
@@ -74,6 +76,12 @@ public class JobCsvReadWrite {
 
     @Bean
     @StepScope
+    ItemProcessor<Employee, Employee> processor() {
+        return item -> item;
+    }
+
+    @Bean
+    @StepScope
     public FlatFileItemWriter<Employee> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<Employee> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
@@ -83,7 +91,7 @@ public class JobCsvReadWrite {
                 setDelimiter(";");
                 setFieldExtractor(new BeanWrapperFieldExtractor<>() {
                     {
-                        setNames(new String[]{"id", "firstName", "lastName"});
+                        setNames(new String[]{"id", "firstName", "lastName", "age", "salary"});
                     }
                 });
             }
