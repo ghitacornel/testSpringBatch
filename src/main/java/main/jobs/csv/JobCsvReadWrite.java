@@ -43,18 +43,33 @@ public class JobCsvReadWrite {
 
     @Bean
     @StepScope
-    public Step step(ItemReader<Employee> reader, ItemWriter<Employee> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step").<Employee, Employee>chunk(5)
+    public Step step(ItemReader<InputItem> reader, ItemProcessor<InputItem, OutputItem> processor, ItemWriter<OutputItem> writer) {
+        return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step").<InputItem, OutputItem>chunk(5)
                 .reader(reader)
-                .processor(processor())
+                .processor(processor)
                 .writer(writer)
                 .build();
     }
 
     @Bean
     @StepScope
-    public FlatFileItemReader<Employee> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
-        FlatFileItemReader<Employee> reader = new FlatFileItemReader<>();
+    public ItemProcessor<InputItem, OutputItem> processor() {
+        return input -> {
+            OutputItem output = new OutputItem();
+            output.setId(input.getId());
+            output.setFirstName(input.getFirstName());
+            output.setLastName(input.getLastName());
+            output.setAge(input.getAge() + 1);
+            output.setSalary(input.getSalary() + 2);
+            output.setDifference(input.getSalary() - input.getAge());
+            return output;
+        };
+    }
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<InputItem> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+        FlatFileItemReader<InputItem> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLinesToSkip(1);// skip header
         reader.setLineMapper(new DefaultLineMapper<>() {
@@ -66,7 +81,7 @@ public class JobCsvReadWrite {
                 });
                 setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
                     {
-                        setTargetType(Employee.class);
+                        setTargetType(InputItem.class);
                     }
                 });
             }
@@ -76,14 +91,8 @@ public class JobCsvReadWrite {
 
     @Bean
     @StepScope
-    ItemProcessor<Employee, Employee> processor() {
-        return item -> item;
-    }
-
-    @Bean
-    @StepScope
-    public FlatFileItemWriter<Employee> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
-        FlatFileItemWriter<Employee> writer = new FlatFileItemWriter<>();
+    public FlatFileItemWriter<OutputItem> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+        FlatFileItemWriter<OutputItem> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
         writer.setAppendAllowed(false);// append or rewrite
         writer.setLineAggregator(new DelimitedLineAggregator<>() {
@@ -91,7 +100,7 @@ public class JobCsvReadWrite {
                 setDelimiter(";");
                 setFieldExtractor(new BeanWrapperFieldExtractor<>() {
                     {
-                        setNames(new String[]{"id", "firstName", "lastName", "age", "salary"});
+                        setNames(new String[]{"id", "firstName", "lastName", "age", "salary", "difference"});
                     }
                 });
             }

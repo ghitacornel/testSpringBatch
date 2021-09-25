@@ -1,6 +1,6 @@
 package main.jobs.csv;
 
-public class Employee {
+public class InputItem {
 
     private String id;
     private String firstName;
