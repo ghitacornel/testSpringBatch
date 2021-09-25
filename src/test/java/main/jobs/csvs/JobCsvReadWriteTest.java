@@ -1,8 +1,6 @@
 package main.jobs.csvs;
 
 import main.jobs.TestsConfiguration;
-import main.jobs.tasklets.JobTaskletExecutionListener;
-import main.jobs.tasklets.JobTaskletStepExecutionListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
 import org.springframework.batch.test.AssertFile;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;

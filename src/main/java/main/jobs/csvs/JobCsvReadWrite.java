@@ -34,7 +34,7 @@ public class JobCsvReadWrite {
     StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job Job1ReadWrite(@Qualifier("main.jobs.csvs.Job1ReadWrite.step") Step step) {
+    public Job job(@Qualifier("main.jobs.csvs.Job1ReadWrite.step") Step step) {
         return jobBuilderFactory.get("main.jobs.csvs.Job1ReadWrite")
                 .incrementer(new RunIdIncrementer())
                 .start(step)

@@ -1,4 +1,4 @@
-package main.jobs.tasklets;
+package main.jobs.tasklet;
 
 import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.tasklets.JobTaskletConfiguration")
+@ActiveProfiles("main.jobs.tasklet.JobTaskletConfiguration")
 public class JobTaskletConfigurationTest extends TestsConfiguration {
 
     @Autowired
@@ -27,7 +27,7 @@ public class JobTaskletConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.tasklets.JobTaskletConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.tasklet.JobTaskletConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();

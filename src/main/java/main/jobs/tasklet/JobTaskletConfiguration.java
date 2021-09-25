@@ -1,4 +1,4 @@
-package main.jobs.tasklets;
+package main.jobs.tasklet;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("main.jobs.tasklets.JobTaskletConfiguration")
+@Profile("main.jobs.tasklet.JobTaskletConfiguration")
 @Configuration
 public class JobTaskletConfiguration {
 
@@ -22,8 +22,8 @@ public class JobTaskletConfiguration {
     StepBuilderFactory steps;
 
     @Bean
-    public Job job1(JobTaskletExecutionListener job1ExecutionListener, JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
-        return jobBuilderFactory.get("main.jobs.tasklets.JobTaskletConfiguration")
+    public Job job(JobTaskletExecutionListener job1ExecutionListener, JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
+        return jobBuilderFactory.get("main.jobs.tasklet.JobTaskletConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step1(jobTaskletStepExecutionListener))
                 .next(step2())
