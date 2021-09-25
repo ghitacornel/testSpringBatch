@@ -21,12 +21,6 @@ import java.util.Iterator;
 @ActiveProfiles("main.jobs.csvs.Job1ReadWrite")
 public class Job1ReadWriteTest extends TestsConfiguration {
 
-    @Autowired
-    JobTaskletExecutionListener job1ExecutionListener;
-
-    @Autowired
-    JobTaskletStepExecutionListener jobTaskletStepExecutionListener;
-
     @TempDir
     Path workingFolder;
 
