@@ -25,7 +25,7 @@ import org.springframework.core.io.FileSystemResource;
 
 @Profile("main.jobs.csvs.Job1ReadWrite")
 @Configuration
-public class Job1ReadWrite {
+public class JobCsvReadWrite {
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;

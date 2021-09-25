@@ -19,7 +19,7 @@ import java.nio.file.*;
 import java.util.Iterator;
 
 @ActiveProfiles("main.jobs.csvs.Job1ReadWrite")
-public class Job1ReadWriteTest extends TestsConfiguration {
+public class JobCsvReadWriteTest extends TestsConfiguration {
 
     @TempDir
     Path workingFolder;
