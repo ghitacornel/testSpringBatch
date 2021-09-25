@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.csvs.Job1ReadWrite")
+@ActiveProfiles("main.jobs.csvs.JobCsvReadWrite")
 public class JobCsvReadWriteTest extends TestsConfiguration {
 
     @TempDir
