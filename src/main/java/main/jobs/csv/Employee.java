@@ -1,4 +1,4 @@
-package main.jobs.csvs;
+package main.jobs.csv;
 
 public class Employee {
 

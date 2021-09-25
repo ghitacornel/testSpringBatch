@@ -21,7 +21,7 @@ public class JobTaskletFailConfiguration {
     StepBuilderFactory steps;
 
     @Bean
-    public Job jobFail() {
+    public Job job() {
         return jobBuilderFactory.get("main.jobs.tasklet.fails.JobTaskletFailConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step())

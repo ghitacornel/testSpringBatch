@@ -1,4 +1,4 @@
-package main.jobs.csvs;
+package main.jobs.csv;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 
-@Profile("main.jobs.csvs.JobCsvReadWrite")
+@Profile("main.jobs.csv.JobCsvReadWrite")
 @Configuration
 public class JobCsvReadWrite {
 
@@ -34,24 +34,24 @@ public class JobCsvReadWrite {
     StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job job(@Qualifier("main.jobs.csvs.Job1ReadWrite.step") Step step) {
-        return jobBuilderFactory.get("main.jobs.csvs.Job1ReadWrite")
+    public Job job(@Qualifier("main.jobs.csv.JobCsvReadWrite.step") Step step) {
+        return jobBuilderFactory.get("main.jobs.csv.JobCsvReadWrite")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
     }
 
-    @Bean("main.jobs.csvs.Job1ReadWrite.step")
+    @Bean("main.jobs.csv.JobCsvReadWrite.step")
     @StepScope
-    public Step step(@Qualifier("main.jobs.csvs.JobCsvReadWrite.step.reader") ItemReader<Employee> reader,
-                     @Qualifier("main.jobs.csvs.JobCsvReadWrite.step.writer") ItemWriter<Employee> writer) {
-        return stepBuilderFactory.get("main.jobs.csvs.Job1ReadWrite.step").<Employee, Employee>chunk(5)
+    public Step step(@Qualifier("main.jobs.csv.JobCsvReadWrite.step.reader") ItemReader<Employee> reader,
+                     @Qualifier("main.jobs.csv.JobCsvReadWrite.step.writer") ItemWriter<Employee> writer) {
+        return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step").<Employee, Employee>chunk(5)
                 .reader(reader)
                 .writer(writer)
                 .build();
     }
 
-    @Bean("main.jobs.csvs.JobCsvReadWrite.step.reader")
+    @Bean("main.jobs.csv.JobCsvReadWrite.step.reader")
     @StepScope
     public FlatFileItemReader<Employee> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<Employee> reader = new FlatFileItemReader<>();
@@ -74,7 +74,7 @@ public class JobCsvReadWrite {
         return reader;
     }
 
-    @Bean("main.jobs.csvs.JobCsvReadWrite.step.writer")
+    @Bean("main.jobs.csv.JobCsvReadWrite.step.writer")
     @StepScope
     public FlatFileItemWriter<Employee> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<Employee> writer = new FlatFileItemWriter<>();

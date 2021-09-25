@@ -1,4 +1,4 @@
-package main.jobs.csvs;
+package main.jobs.csv;
 
 import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.AfterEach;
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.csvs.JobCsvReadWrite")
+@ActiveProfiles("main.jobs.csv.JobCsvReadWrite")
 public class JobCsvReadWriteTest extends TestsConfiguration {
 
     @TempDir
@@ -23,14 +23,14 @@ public class JobCsvReadWriteTest extends TestsConfiguration {
 
     @BeforeEach
     public void writeFile() throws IOException {
-        Path input = Paths.get("src", "test", "resources", "csvs", "input.csv");
+        Path input = Paths.get("src", "test", "resources", "csv", "input.csv");
         Path output = Paths.get(workingFolder.toString(), "input.csv");
         Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
     }
 
     @AfterEach
     public void checkFile() throws Exception {
-        Path input = Paths.get("src", "test", "resources", "csvs", "output.csv");
+        Path input = Paths.get("src", "test", "resources", "csv", "output.csv");
         Path output = Paths.get(workingFolder.toString(), "output.csv");
         AssertFile.assertFileEquals(input.toFile(), output.toFile());
     }
@@ -49,7 +49,7 @@ public class JobCsvReadWriteTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csvs.Job1ReadWrite");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.JobCsvReadWrite");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -57,7 +57,7 @@ public class JobCsvReadWriteTest extends TestsConfiguration {
         // test step
         StepExecution stepExecution = stepExecutionIterator.next();
         Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csvs.Job1ReadWrite.step");
+        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobCsvReadWrite.step");
 
         // no more steps
         Assertions.assertFalse(stepExecutionIterator.hasNext());
