@@ -56,7 +56,7 @@ public class Job1ReadWrite {
     public FlatFileItemReader<Employee> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<Employee> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
-        reader.setLinesToSkip(1);
+        reader.setLinesToSkip(1);// skip header
         reader.setLineMapper(new DefaultLineMapper<>() {
             {
                 setLineTokenizer(new DelimitedLineTokenizer() {
@@ -79,10 +79,10 @@ public class Job1ReadWrite {
     public FlatFileItemWriter<Employee> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<Employee> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
-        writer.setAppendAllowed(false);
+        writer.setAppendAllowed(false);// append or rewrite
         writer.setLineAggregator(new DelimitedLineAggregator<>() {
             {
-                setDelimiter(",");
+                setDelimiter(";");
                 setFieldExtractor(new BeanWrapperFieldExtractor<>() {
                     {
                         setNames(new String[]{"id", "firstName", "lastName"});
