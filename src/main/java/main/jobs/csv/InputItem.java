@@ -1,11 +1,26 @@
 package main.jobs.csv;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 public class InputItem {
 
+    @NotNull
     private String id;
+
+    @NotBlank
     private String firstName;
+
+    @NotBlank
     private String lastName;
+
+    @Min(20)
+    @Max(65)
     private int age;
+
+    @Min(100)
     private long salary;
 
     public String getId() {
