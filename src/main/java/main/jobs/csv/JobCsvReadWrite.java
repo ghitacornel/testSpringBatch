@@ -23,6 +23,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.Set;
+
 @Profile("main.jobs.csv.JobCsvReadWrite")
 @Configuration
 public class JobCsvReadWrite {
@@ -32,6 +36,9 @@ public class JobCsvReadWrite {
 
     @Autowired
     StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    Validator validator;
 
     @Bean
     public Job job(Step step) {
@@ -55,6 +62,13 @@ public class JobCsvReadWrite {
     @StepScope
     public ItemProcessor<InputItem, OutputItem> processor() {
         return input -> {
+            {
+                Set<ConstraintViolation<InputItem>> violations = validator.validate(input);
+                if (!violations.isEmpty()) {
+                    System.err.println(violations);
+                    return null;
+                }
+            }
             OutputItem output = new OutputItem();
             output.setId(input.getId());
             output.setFirstName(input.getFirstName());

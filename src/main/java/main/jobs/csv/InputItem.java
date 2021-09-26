@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 public class InputItem {
 
     @NotNull
-    private String id;
+    private Integer id;
 
     @NotBlank
     private String firstName;
@@ -23,11 +23,11 @@ public class InputItem {
     @Min(100)
     private long salary;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -2,18 +2,18 @@ package main.jobs.csv;
 
 public class OutputItem {
 
-    private String id;
+    private Integer id;
     private String firstName;
     private String lastName;
     private int age;
     private long salary;
     private long difference;
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
