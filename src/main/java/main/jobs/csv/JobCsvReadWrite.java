@@ -111,7 +111,7 @@ public class JobCsvReadWrite {
         writer.setAppendAllowed(false);// append or rewrite
         writer.setLineAggregator(new DelimitedLineAggregator<>() {
             {
-                setDelimiter(";");
+                setDelimiter(",");// can specify custom delimiter here
                 setFieldExtractor(new BeanWrapperFieldExtractor<>() {
                     {
                         setNames(new String[]{"id", "firstName", "lastName", "age", "salary", "difference"});

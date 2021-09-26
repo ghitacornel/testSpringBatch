@@ -62,4 +62,16 @@ public class InputItem {
     public void setSalary(long salary) {
         this.salary = salary;
     }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 1000; i++) {
+            InputItem inputItem = new InputItem();
+            inputItem.setId(i);
+            inputItem.setFirstName("name" + i);
+            inputItem.setLastName("surname" + i);
+            inputItem.setAge(i % 45 + 20+1);
+            inputItem.setSalary(i + 100+2);
+            System.out.println(inputItem.id + "," + inputItem.getFirstName() + "," + inputItem.getLastName() + "," + inputItem.getAge() + "," + inputItem.getSalary()+","+(inputItem.getSalary()-inputItem.getAge()));
+        }
+    }
 }
