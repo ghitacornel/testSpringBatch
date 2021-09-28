@@ -9,6 +9,8 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.file.FlatFileFooterCallback;
+import org.springframework.batch.item.file.FlatFileHeaderCallback;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -25,6 +27,8 @@ import org.springframework.core.io.FileSystemResource;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Set;
 
 @Profile("main.jobs.csv.JobCsvReadWrite")
@@ -109,7 +113,11 @@ public class JobCsvReadWrite {
     public FlatFileItemWriter<OutputItem> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<OutputItem> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
-        writer.setAppendAllowed(false);// append or rewrite
+
+        // append or rewrite
+        writer.setAppendAllowed(false);
+
+        // delimiter and header order
         writer.setLineAggregator(new DelimitedLineAggregator<>() {
             {
                 setDelimiter(",");// can specify custom delimiter here
@@ -120,6 +128,13 @@ public class JobCsvReadWrite {
                 });
             }
         });
+
+        // custom header labels
+        writer.setHeaderCallback(writer1 -> writer1.write("header1,header2,header3,header4,header5,header6"));
+
+        // custom end of file
+        writer.setFooterCallback(writer12 -> writer12.write("done"));
+
         return writer;
     }
 
