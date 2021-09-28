@@ -58,6 +58,10 @@ public class JobCsvReadWriteTest extends TestsConfiguration {
         StepExecution stepExecution = stepExecutionIterator.next();
         Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
         Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobCsvReadWrite.step");
+        Assertions.assertEquals(stepExecution.getReadCount(), 1008);
+        Assertions.assertEquals(stepExecution.getWriteCount(), 1000);
+        Assertions.assertEquals(stepExecution.getFilterCount(), 8);
+        Assertions.assertEquals(stepExecution.getCommitCount(), 11);
 
         // no more steps
         Assertions.assertFalse(stepExecutionIterator.hasNext());
