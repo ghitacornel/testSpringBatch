@@ -75,7 +75,7 @@ public class JobCsvReadWrite {
             output.setLastName(input.getLastName());
             output.setAge(input.getAge() + 1);
             output.setSalary(input.getSalary() + 2);
-            output.setDifference(input.getSalary() - input.getAge());
+            output.setDifference(output.getSalary() - output.getAge());
             return output;
         };
     }
