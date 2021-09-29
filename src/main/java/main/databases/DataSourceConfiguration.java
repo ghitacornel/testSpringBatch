@@ -14,32 +14,32 @@ public class DataSourceConfiguration {
     // Spring batch always needs at least 1 data source
     @Primary
     @Bean(name = "dataSource")// mandatory name "dataSource"
-    public DataSource dataSourceBatch() {
+    public DataSource dataSource() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-        dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
-        dataSourceBuilder.url("jdbc:mysql://localhost:3307/batch_database");
-        dataSourceBuilder.username("cornel");
-        dataSourceBuilder.password("sefusefu");
+        dataSourceBuilder.driverClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
+        dataSourceBuilder.url("jdbc:derby:memory:demo;create=true");
+        dataSourceBuilder.username("");
+        dataSourceBuilder.password("");
         return dataSourceBuilder.build();
     }
 
     @Bean
     public DataSource dataSourceMySQL() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-        dataSourceBuilder.driverClassName("com.mysql.cj.jdbc.Driver");
-        dataSourceBuilder.url("jdbc:mysql://localhost:3306/mysql_database");
-        dataSourceBuilder.username("cornel");
-        dataSourceBuilder.password("sefusefu");
+        dataSourceBuilder.driverClassName("org.h2.Driver");
+        dataSourceBuilder.url("jdbc:h2:mem:test");
+        dataSourceBuilder.username("");
+        dataSourceBuilder.password("");
         return dataSourceBuilder.build();
     }
 
     @Bean
     public DataSource dataSourcePostgreSQL() {
         DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-        dataSourceBuilder.driverClassName("org.postgresql.Driver");
-        dataSourceBuilder.url("jdbc:postgresql://localhost:5432/postgresql_database");
-        dataSourceBuilder.username("cornel");
-        dataSourceBuilder.password("sefusefu");
+        dataSourceBuilder.driverClassName("org.hsqldb.jdbcDriver");
+        dataSourceBuilder.url("jdbc:hsqldb:mem:testdb");
+        dataSourceBuilder.username("");
+        dataSourceBuilder.password("");
         return dataSourceBuilder.build();
     }
 

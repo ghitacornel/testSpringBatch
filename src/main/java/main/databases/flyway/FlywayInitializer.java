@@ -31,7 +31,6 @@ public class FlywayInitializer {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(dataSource);
             configuration.setLocationsAsStrings("db/migration/batch");
-            configuration.setSchemas("batch_database");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -51,7 +50,6 @@ public class FlywayInitializer {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(dataSourcePostgreSQL);
             configuration.setLocationsAsStrings("db/migration/postgres");
-            configuration.setSchemas("postgresql_database");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
