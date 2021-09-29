@@ -31,7 +31,7 @@ public class Step4Configuration {
     String step4OutputFile;
 
     @Autowired
-    @Qualifier("dataSourcePostgreSQL")
+    @Qualifier("dataSource2")
     DataSource dataSource;
 
     @Bean

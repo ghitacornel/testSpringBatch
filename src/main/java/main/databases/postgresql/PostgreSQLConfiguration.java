@@ -23,7 +23,7 @@ import java.util.Map;
 public class PostgreSQLConfiguration {
 
     @Autowired
-    @Qualifier("dataSourcePostgreSQL")
+    @Qualifier("dataSource2")
     DataSource dataSource;
 
     // no need for a dedicated EntityManagerFactory bean

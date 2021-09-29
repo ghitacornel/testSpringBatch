@@ -23,7 +23,7 @@ import java.util.Map;
 public class MySQLConfiguration {
 
     @Autowired
-    @Qualifier("dataSourceMySQL")
+    @Qualifier("dataSource1")
     DataSource dataSource;
 
     // no need for a dedicated EntityManagerFactory bean
