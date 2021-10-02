@@ -43,21 +43,17 @@ public class JobCsvReadWritePerformance {
     @Autowired
     StepBuilderFactory stepBuilderFactory;
 
-    String inputPath = "input.csv";
-
     @Bean
-    public Job job(@Qualifier("createData") Step createData, @Qualifier("step") Step step, @Qualifier("verifyFile") Step verifyFile) {
+    public Job job(@Qualifier("step") Step step) {
         return jobBuilderFactory.get("main.jobs.csv.performance.JobCsvReadWritePerformance")
                 .incrementer(new RunIdIncrementer())
-                .start(createData)
+                .start(createData())
                 .next(step)
-                .next(verifyFile)
+                .next(verifyFile())
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public Step createData() {
+    private Step createData() {
         return stepBuilderFactory
                 .get("main.jobs.csv.performance.JobCsvReadWritePerformance.createData")
                 .tasklet((contribution, chunkContext) -> {
@@ -79,9 +75,7 @@ public class JobCsvReadWritePerformance {
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public Step verifyFile() {
+    private Step verifyFile() {
         return stepBuilderFactory
                 .get("main.jobs.csv.performance.JobCsvReadWritePerformance.verifyFile")
                 .tasklet((contribution, chunkContext) -> {
@@ -96,16 +90,14 @@ public class JobCsvReadWritePerformance {
                 .build();
     }
 
-
     @Bean
-    @StepScope
-    public Step step(ItemReader<InputDTO> reader, ItemProcessor<InputDTO, OutputDTO> processor, ItemWriter<OutputDTO> writer, TaskExecutor taskExecutor) {
+    public Step step(ItemReader<InputDTO> reader, ItemProcessor<InputDTO, OutputDTO> processor, ItemWriter<OutputDTO> writer) {
         return stepBuilderFactory.get("main.jobs.csv.performance.JobCsvReadWritePerformance.step")
                 .<InputDTO, OutputDTO>chunk(1000)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
-                .taskExecutor(taskExecutor)
+                .taskExecutor(taskExecutor())
                 .throttleLimit(5)
                 .build();
     }
@@ -165,8 +157,7 @@ public class JobCsvReadWritePerformance {
         return writer;
     }
 
-    @Bean
-    public TaskExecutor taskExecutor() {
+    private TaskExecutor taskExecutor() {
         return new SimpleAsyncTaskExecutor("performanceTaskExecutor");
     }
 
