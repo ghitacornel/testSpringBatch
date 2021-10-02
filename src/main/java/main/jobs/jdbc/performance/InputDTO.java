@@ -65,4 +65,14 @@ public class InputDTO {
         this.salary = salary;
     }
 
+    @Override
+    public String toString() {
+        return "InputDTO{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                ", salary=" + salary +
+                '}';
+    }
 }
