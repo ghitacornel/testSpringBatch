@@ -25,8 +25,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import javax.sql.DataSource;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,12 +42,12 @@ public class JobJdbcReadWritePerformance {
     StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    @Qualifier("dataSource1")
-    DataSource dataSource1;
+    @Qualifier("dataSourceH2")
+    DataSource dataSourceH2;
 
     @Autowired
-    @Qualifier("dataSource2")
-    DataSource dataSource2;
+    @Qualifier("dataSourceHSQL")
+    DataSource dataSourceHSQL;
 
     @Bean
     public Job job(@Qualifier("createData") Step createData, @Qualifier("step") Step step, @Qualifier("verifyFile") Step verifyFile) {
@@ -73,7 +71,7 @@ public class JobJdbcReadWritePerformance {
                         InputDTO inputDTO = InputDTO.generate();
                         list.add(inputDTO);
                     }
-                    Connection connection = dataSource1.getConnection();
+                    Connection connection = dataSourceH2.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
                         preparedStatement.setInt(1, inputDTO.getId());
@@ -96,7 +94,7 @@ public class JobJdbcReadWritePerformance {
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.verifyFile")
                 .tasklet((contribution, chunkContext) -> {
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    Connection connection = dataSource2.getConnection();
+                    Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
                     ResultSet resultSet = preparedStatement.executeQuery();
                     resultSet.next();
@@ -144,7 +142,7 @@ public class JobJdbcReadWritePerformance {
     public JdbcCursorItemReader<InputDTO> reader() {
         return new JdbcCursorItemReaderBuilder<InputDTO>()
                 .name("cursorItemReader")
-                .dataSource(dataSource1)
+                .dataSource(dataSourceH2)
                 .sql("select * from InputDTO")
                 .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
                 .build();
@@ -156,7 +154,7 @@ public class JobJdbcReadWritePerformance {
         return new JdbcBatchItemWriterBuilder<OutputDTO>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
                 .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (:id,:firstName,:lastName,:salary,:age,:difference")
-                .dataSource(dataSource2)
+                .dataSource(dataSourceHSQL)
                 .build();
     }
 

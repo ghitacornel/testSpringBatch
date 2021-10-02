@@ -1,4 +1,4 @@
-package main.databases.postgresql;
+package main.databases.hsql;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,31 +18,33 @@ import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(entityManagerFactoryRef = "postgresqlEMF",
-        transactionManagerRef = "postgresqlPTM", basePackages = {"main.databases.postgresql.repositories"})
-public class PostgreSQLConfiguration {
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "hsqlEMFB",
+        transactionManagerRef = "hsqlPTM",
+        basePackages = {"main.databases.hsql.repositories"}
+)
+public class HSQLConfiguration {
 
     @Autowired
-    @Qualifier("dataSource2")
+    @Qualifier("dataSourceHSQL")
     DataSource dataSource;
 
-    // no need for a dedicated EntityManagerFactory bean
-    @Bean(name = "postgresqlEMF")
-    public LocalContainerEntityManagerFactoryBean postgresqlEMF(EntityManagerFactoryBuilder builder) {
+    @Bean
+    LocalContainerEntityManagerFactoryBean hsqlEMFB(EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
 //        map.put("javax.persistence.schema-generation.database.action", "drop-and-create");
 //        map.put("javax.persistence.schema-generation.database.action", "validate");
         map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         return builder
                 .dataSource(dataSource)
-                .packages("main.databases.postgresql.domain")
-                .persistenceUnit("postgresql")
+                .packages("main.databases.hsql.domain")
+                .persistenceUnit("hsql")
                 .properties(map)
                 .build();
     }
 
-    @Bean(name = "postgresqlPTM")
-    public PlatformTransactionManager postgresqlPTM(@Qualifier("postgresqlEMF") EntityManagerFactory entityManagerFactory) {
+    @Bean
+    PlatformTransactionManager hsqlPTM(@Qualifier("hsqlEMFB") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 

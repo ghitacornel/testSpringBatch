@@ -1,4 +1,4 @@
-package main.databases.mysql;
+package main.databases.h2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,31 +18,33 @@ import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(entityManagerFactoryRef = "mysqlEMF",
-        transactionManagerRef = "mysqlPTM", basePackages = {"main.databases.mysql.repositories"})
-public class MySQLConfiguration {
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "h2EMFB",
+        transactionManagerRef = "h2PTM",
+        basePackages = {"main.databases.h2.repositories"}
+)
+public class H2Configuration {
 
     @Autowired
-    @Qualifier("dataSource1")
+    @Qualifier("dataSourceH2")
     DataSource dataSource;
 
-    // no need for a dedicated EntityManagerFactory bean
-    @Bean(name = "mysqlEMF")
-    public LocalContainerEntityManagerFactoryBean mysqlEMF(EntityManagerFactoryBuilder builder) {
+    @Bean
+    LocalContainerEntityManagerFactoryBean h2EMFB(EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
 //        map.put("javax.persistence.schema-generation.database.action", "drop-and-create");
 //        map.put("javax.persistence.schema-generation.database.action", "validate");
         map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder
                 .dataSource(dataSource)
-                .packages("main.databases.mysql.domain")
-                .persistenceUnit("mysql")
+                .packages("main.databases.h2.domain")
+                .persistenceUnit("h2")
                 .properties(map)
                 .build();
     }
 
-    @Bean(name = "mysqlPTM")
-    public PlatformTransactionManager mysqlPTM(@Qualifier("mysqlEMF") EntityManagerFactory entityManagerFactory) {
+    @Bean
+    PlatformTransactionManager h2PTM(@Qualifier("h2EMFB") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 

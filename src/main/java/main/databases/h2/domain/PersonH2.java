@@ -1,4 +1,4 @@
-package main.databases.mysql.domain;
+package main.databases.h2.domain;
 
 import lombok.Data;
 
@@ -8,9 +8,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "person_mysql")
+@Table(name = "person_h2")
 @Data
-public class PersonMySQL {
+public class PersonH2 {
 
     @Id
     @Column(name = "id")

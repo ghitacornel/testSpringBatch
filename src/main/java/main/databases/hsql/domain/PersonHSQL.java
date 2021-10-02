@@ -1,4 +1,4 @@
-package main.databases.postgresql.domain;
+package main.databases.hsql.domain;
 
 import lombok.Data;
 
@@ -9,9 +9,9 @@ import javax.persistence.Table;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "person_postgresql", schema = "postgresql_database")
+@Table(name = "person_hsql")
 @Data
-public class PersonPostgreSQL {
+public class PersonHSQL {
 
     @Id
     @Column(name = "id")
