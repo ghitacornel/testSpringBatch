@@ -73,6 +73,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                         list.add(inputDTO);
                     }
                     Connection connection = dataSourceH2.getConnection();
+                    connection.createStatement().executeUpdate("truncate table InputDTO");
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
                         preparedStatement.setInt(1, inputDTO.getId());

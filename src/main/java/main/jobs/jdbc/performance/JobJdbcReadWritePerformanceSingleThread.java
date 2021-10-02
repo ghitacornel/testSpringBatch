@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import javax.sql.DataSource;
@@ -66,6 +64,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
                         list.add(inputDTO);
                     }
                     Connection connection = dataSourceH2.getConnection();
+                    connection.createStatement().executeUpdate("truncate table InputDTO");
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
                         preparedStatement.setInt(1, inputDTO.getId());
