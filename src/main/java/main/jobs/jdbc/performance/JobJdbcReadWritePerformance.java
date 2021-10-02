@@ -60,7 +60,7 @@ public class JobJdbcReadWritePerformance {
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.createData")
                 .tasklet((contribution, chunkContext) -> {
 //                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    long count = 1000;
+                    long count = 10;
                     List<InputDTO> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
