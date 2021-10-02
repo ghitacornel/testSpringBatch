@@ -2,6 +2,8 @@ package main.jobs.jdbc.performance;
 
 import com.github.javafaker.Faker;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class InputDTO {
 
     private Integer id;
@@ -11,10 +13,11 @@ public class InputDTO {
     private long salary;
 
     private static final Faker faker = new Faker();
+    private static final AtomicInteger ids =new AtomicInteger(0);
 
     public static InputDTO generate() {
         InputDTO inputDTO = new InputDTO();
-        inputDTO.setId(faker.number().numberBetween(1, Integer.MAX_VALUE));
+        inputDTO.setId(ids.getAndIncrement());
         inputDTO.setFirstName(faker.name().firstName());
         inputDTO.setLastName(faker.name().lastName());
         inputDTO.setAge(faker.number().numberBetween(1, 100));
