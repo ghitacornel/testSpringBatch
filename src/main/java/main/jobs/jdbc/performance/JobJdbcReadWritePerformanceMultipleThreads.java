@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import javax.sql.DataSource;
@@ -106,6 +108,8 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                 .reader(reader())
                 .processor(processor())
                 .writer(writer())
+                .taskExecutor(taskExecutor())
+                .throttleLimit(5)
                 .build();
     }
 
@@ -144,6 +148,10 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                 .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
                 .dataSource(dataSourceHSQL)
                 .build();
+    }
+
+    private TaskExecutor taskExecutor() {
+        return new SimpleAsyncTaskExecutor("performanceTaskExecutor");
     }
 
 }
