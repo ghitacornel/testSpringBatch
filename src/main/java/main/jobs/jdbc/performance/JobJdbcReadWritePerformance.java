@@ -4,12 +4,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
@@ -142,8 +138,15 @@ public class JobJdbcReadWritePerformance {
 
     private JdbcBatchItemWriter<OutputDTO> writer() {
         return new JdbcBatchItemWriterBuilder<OutputDTO>()
-                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (:id,:firstName,:lastName,:salary,:age,:difference)")
+                .itemPreparedStatementSetter((item, ps) -> {
+                    ps.setInt(1, item.getId());
+                    ps.setString(2, item.getFirstName());
+                    ps.setString(3, item.getLastName());
+                    ps.setLong(4, item.getSalary());
+                    ps.setInt(5, item.getAge());
+                    ps.setLong(6, item.getDifference());
+                })
+                .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
                 .dataSource(dataSourceHSQL)
                 .build();
     }
