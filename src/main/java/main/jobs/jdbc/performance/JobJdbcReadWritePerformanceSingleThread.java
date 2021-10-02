@@ -126,7 +126,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
 
     private JdbcCursorItemReader<InputDTO> reader() {
         return new JdbcCursorItemReaderBuilder<InputDTO>()
-                .name("cursorItemReader")
+                .name("jdbcCursorItemReader")
                 .dataSource(dataSourceH2)
                 .sql("select * from InputDTO")
                 .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
