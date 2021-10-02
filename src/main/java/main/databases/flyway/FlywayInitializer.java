@@ -18,11 +18,11 @@ public class FlywayInitializer {
 
     @Autowired
     @Qualifier("dataSourceH2")
-    private DataSource dataSource1;
+    private DataSource dataSourceH2;
 
     @Autowired
     @Qualifier("dataSourceHSQL")
-    private DataSource dataSource2;
+    private DataSource dataSourceHSQL;
 
     @PostConstruct
     public void migrateFlyway() {
@@ -38,9 +38,8 @@ public class FlywayInitializer {
 
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
-            configuration.setDataSource(dataSource1);
+            configuration.setDataSource(dataSourceH2);
             configuration.setLocationsAsStrings("db/migration/h2");
-            configuration.setSchemas("mysql_database");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -48,7 +47,7 @@ public class FlywayInitializer {
 
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
-            configuration.setDataSource(dataSource2);
+            configuration.setDataSource(dataSourceHSQL);
             configuration.setLocationsAsStrings("db/migration/hsql");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);

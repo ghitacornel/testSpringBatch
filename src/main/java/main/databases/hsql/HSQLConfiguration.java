@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -23,6 +24,7 @@ import java.util.Map;
         transactionManagerRef = "hsqlPTM",
         basePackages = {"main.databases.hsql.repositories"}
 )
+@DependsOn({"flywayInitializer"})
 public class HSQLConfiguration {
 
     @Autowired
@@ -33,7 +35,7 @@ public class HSQLConfiguration {
     LocalContainerEntityManagerFactoryBean hsqlEMFB(EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
 //        map.put("javax.persistence.schema-generation.database.action", "drop-and-create");
-//        map.put("javax.persistence.schema-generation.database.action", "validate");
+        map.put("javax.persistence.schema-generation.database.action", "validate");
         map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         return builder
                 .dataSource(dataSource)
