@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +65,9 @@ public class JobJdbcReadWritePerformanceSingleThread {
                         list.add(inputDTO);
                     }
                     Connection connection = dataSourceH2.getConnection();
-                    connection.createStatement().executeUpdate("truncate table InputDTO");
+                    Statement statement = connection.createStatement();
+                    statement.executeUpdate("truncate table InputDTO");
+                    statement.close();
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
                         preparedStatement.setInt(1, inputDTO.getId());
