@@ -35,8 +35,8 @@ public class H2Configuration {
     LocalContainerEntityManagerFactoryBean h2EMFB(EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
 //        map.put("javax.persistence.schema-generation.database.action", "drop-and-create");
-        map.put("hibernate.show_sql", "true");
-        map.put("hibernate.format_sql", "true");
+//        map.put("hibernate.show_sql", "true");
+//        map.put("hibernate.format_sql", "true");
         map.put("javax.persistence.schema-generation.database.action", "validate");
         map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder

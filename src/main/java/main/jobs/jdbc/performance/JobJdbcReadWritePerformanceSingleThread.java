@@ -27,9 +27,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformance")
+@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
 @Configuration
-public class JobJdbcReadWritePerformance {
+public class JobJdbcReadWritePerformanceSingleThread {
 
     @Autowired
     JobBuilderFactory jobBuilderFactory;
@@ -47,7 +47,7 @@ public class JobJdbcReadWritePerformance {
 
     @Bean
     public Job job() {
-        return jobBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance")
+        return jobBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
                 .incrementer(new RunIdIncrementer())
                 .start(createData())
                 .next(step())
@@ -57,7 +57,7 @@ public class JobJdbcReadWritePerformance {
 
     private Step createData() {
         return stepBuilderFactory
-                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.createData")
+                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.createData")
                 .tasklet((contribution, chunkContext) -> {
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<InputDTO> list = new ArrayList<>();
@@ -84,7 +84,7 @@ public class JobJdbcReadWritePerformance {
 
     private Step verifyDatabase() {
         return stepBuilderFactory
-                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.verifyDatabase")
+                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.verifyDatabase")
                 .tasklet((contribution, chunkContext) -> {
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
@@ -103,13 +103,11 @@ public class JobJdbcReadWritePerformance {
     }
 
     private Step step() {
-        return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.step")
+        return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.step")
                 .<InputDTO, OutputDTO>chunk(1000)// larger is faster but requires more memory
                 .reader(reader())
                 .processor(processor())
                 .writer(writer())
-//                .taskExecutor(taskExecutor())
-//                .throttleLimit(5)
                 .build();
     }
 
@@ -148,10 +146,6 @@ public class JobJdbcReadWritePerformance {
                 .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
                 .dataSource(dataSourceHSQL)
                 .build();
-    }
-
-    private TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor("performanceTaskExecutor");
     }
 
 }

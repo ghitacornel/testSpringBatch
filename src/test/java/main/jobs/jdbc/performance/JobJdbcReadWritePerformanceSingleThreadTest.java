@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("main.jobs.jdbc.performance.JobJdbcReadWritePerformance")
-public class JobJdbcReadWritePerformanceTest extends TestsConfiguration {
+@ActiveProfiles("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
+public class JobJdbcReadWritePerformanceSingleThreadTest extends TestsConfiguration {
 
     @Test
     public void testJob() throws Exception {
@@ -22,7 +22,7 @@ public class JobJdbcReadWritePerformanceTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jdbc.performance.JobJdbcReadWritePerformance");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }
