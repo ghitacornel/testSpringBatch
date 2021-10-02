@@ -8,8 +8,12 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.support.H2PagingQueryProvider;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,13 +23,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
 @Configuration
@@ -126,13 +133,35 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
         };
     }
 
-    private JdbcCursorItemReader<InputDTO> reader() {
-        return new JdbcCursorItemReaderBuilder<InputDTO>()
-                .name("cursorItemReader")
+    private JdbcPagingItemReader<InputDTO> reader() {
+
+        Map<String, Order> sort = new HashMap<>(1);
+        sort.put("id", Order.ASCENDING);
+
+        H2PagingQueryProvider queryProvider = new H2PagingQueryProvider();
+        queryProvider.setSelectClause("*");
+        queryProvider.setFromClause("InputDTO");
+        queryProvider.setSortKeys(sort);
+
+        JdbcPagingItemReader<InputDTO> jdbcPagingItemReader = new JdbcPagingItemReaderBuilder<InputDTO>()
+                .name("jdbcPagingItemReader")
                 .dataSource(dataSourceH2)
-                .sql("select * from InputDTO")
-                .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
+                .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class)) // equivalent to .beanRowMapper(InputDTO.class)
+                .pageSize(1000)
+                .fetchSize(1000)
+                .queryProvider(queryProvider)
                 .build();
+
+        // MAJOR FUCKED UP THING IN BUILDER
+        // BUILDER SHOULD EITHER CALL THIS BAD DESIGN CHOICE "afterPropertiesSet"
+        // OR SHOULD SET namedParameterJdbcTemplate to something
+        try {
+            jdbcPagingItemReader.afterPropertiesSet();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return jdbcPagingItemReader;
     }
 
     private JdbcBatchItemWriter<OutputDTO> writer() {
