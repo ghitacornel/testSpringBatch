@@ -56,4 +56,16 @@ public class OutputDTO {
     public void setDifference(long difference) {
         this.difference = difference;
     }
+
+    @Override
+    public String toString() {
+        return "OutputDTO{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                ", salary=" + salary +
+                ", difference=" + difference +
+                '}';
+    }
 }
