@@ -9,8 +9,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileFooterCallback;
-import org.springframework.batch.item.file.FlatFileHeaderCallback;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -27,8 +25,6 @@ import org.springframework.core.io.FileSystemResource;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Set;
 
 @Profile("main.jobs.csv.JobCsvReadWrite")
@@ -53,7 +49,6 @@ public class JobCsvReadWrite {
     }
 
     @Bean
-    @StepScope
     public Step step(ItemReader<InputItem> reader, ItemProcessor<InputItem, OutputItem> processor, ItemWriter<OutputItem> writer) {
         return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step")
                 .<InputItem, OutputItem>chunk(100)// larger is faster but requires more memory
