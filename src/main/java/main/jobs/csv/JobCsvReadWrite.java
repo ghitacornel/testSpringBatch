@@ -82,7 +82,7 @@ public class JobCsvReadWrite {
 
     @Bean
     @StepScope
-    public ItemReader<InputItem> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+    public FlatFileItemReader<InputItem> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<InputItem> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLinesToSkip(1);// skip header
@@ -105,7 +105,7 @@ public class JobCsvReadWrite {
 
     @Bean
     @StepScope
-    public ItemWriter<OutputItem> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+    public FlatFileItemWriter<OutputItem> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<OutputItem> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
 

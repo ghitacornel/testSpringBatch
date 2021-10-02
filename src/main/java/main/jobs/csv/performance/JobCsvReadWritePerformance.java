@@ -119,7 +119,7 @@ public class JobCsvReadWritePerformance {
 
     @Bean
     @StepScope
-    public ItemReader<InputDTO> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+    public FlatFileItemReader<InputDTO> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<InputDTO> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLineMapper(new DefaultLineMapper<>() {
@@ -141,7 +141,7 @@ public class JobCsvReadWritePerformance {
 
     @Bean
     @StepScope
-    public ItemWriter<OutputDTO> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+    public FlatFileItemWriter<OutputDTO> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<OutputDTO> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
         writer.setAppendAllowed(false);
