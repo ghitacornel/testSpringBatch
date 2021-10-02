@@ -143,7 +143,7 @@ public class JobJdbcReadWritePerformance {
     private JdbcBatchItemWriter<OutputDTO> writer() {
         return new JdbcBatchItemWriterBuilder<OutputDTO>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (:id,:firstName,:lastName,:salary,:age,:difference")
+                .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (:id,:firstName,:lastName,:salary,:age,:difference)")
                 .dataSource(dataSourceHSQL)
                 .build();
     }
