@@ -135,7 +135,7 @@ public class JobJdbcReadWritePerformance {
 
     @Bean
     @StepScope
-    public JdbcCursorItemReader<InputDTO> reader() {
+    public ItemReader<InputDTO> reader() {
         return new JdbcCursorItemReaderBuilder<InputDTO>()
                 .name("cursorItemReader")
                 .dataSource(dataSourceH2)
@@ -146,7 +146,7 @@ public class JobJdbcReadWritePerformance {
 
     @Bean
     @StepScope
-    public JdbcBatchItemWriter<OutputDTO> writer() {
+    public ItemWriter<OutputDTO> writer() {
         return new JdbcBatchItemWriterBuilder<OutputDTO>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
                 .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (:id,:firstName,:lastName,:salary,:age,:difference")
