@@ -79,6 +79,7 @@
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
+            <version>10.15.2.0</version><!-- need to override the default due to incompatibility with HikariCP -->
         </dependency>
 
         <!-- TEST -->
