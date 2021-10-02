@@ -50,22 +50,20 @@ public class JobJdbcReadWritePerformance {
     DataSource dataSourceHSQL;
 
     @Bean
-    public Job job(@Qualifier("createData") Step createData, @Qualifier("step") Step step, @Qualifier("verifyFile") Step verifyFile) {
+    public Job job(@Qualifier("step") Step step) {
         return jobBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance")
                 .incrementer(new RunIdIncrementer())
-                .start(createData)
+                .start(createData())
                 .next(step)
-                .next(verifyFile)
+                .next(verifyDatabase())
                 .build();
     }
 
-    @Bean
-    public Step createData() {
+    private Step createData() {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.createData")
                 .tasklet((contribution, chunkContext) -> {
-//                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    long count = 1000;
+                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<InputDTO> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
@@ -88,8 +86,7 @@ public class JobJdbcReadWritePerformance {
                 .build();
     }
 
-    @Bean
-    public Step verifyFile() {
+    private Step verifyDatabase() {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.verifyFile")
                 .tasklet((contribution, chunkContext) -> {
@@ -109,15 +106,14 @@ public class JobJdbcReadWritePerformance {
                 .build();
     }
 
-
     @Bean
-    public Step step(ItemReader<InputDTO> reader, ItemProcessor<InputDTO, OutputDTO> processor, ItemWriter<OutputDTO> writer, TaskExecutor taskExecutor) {
+    public Step step(ItemReader<InputDTO> reader, ItemProcessor<InputDTO, OutputDTO> processor, ItemWriter<OutputDTO> writer) {
         return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.step")
                 .<InputDTO, OutputDTO>chunk(1000)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
-                .taskExecutor(taskExecutor)
+                .taskExecutor(taskExecutor())
                 .throttleLimit(5)
                 .build();
     }
@@ -158,8 +154,7 @@ public class JobJdbcReadWritePerformance {
                 .build();
     }
 
-    @Bean
-    public TaskExecutor taskExecutor() {
+    private TaskExecutor taskExecutor() {
         return new SimpleAsyncTaskExecutor("performanceTaskExecutor");
     }
 
