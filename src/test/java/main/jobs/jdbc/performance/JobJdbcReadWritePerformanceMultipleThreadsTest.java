@@ -14,7 +14,7 @@ public class JobJdbcReadWritePerformanceMultipleThreadsTest extends TestsConfigu
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("timestamp", System.currentTimeMillis())
-                .addLong("count", 10000L)
+                .addLong("count", 1000000L)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
