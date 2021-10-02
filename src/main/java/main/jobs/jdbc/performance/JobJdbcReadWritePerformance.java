@@ -31,6 +31,8 @@ import java.util.List;
 @Configuration
 public class JobJdbcReadWritePerformance {
 
+    static long count = 10;
+
     @Autowired
     JobBuilderFactory jobBuilderFactory;
 
@@ -59,8 +61,6 @@ public class JobJdbcReadWritePerformance {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.createData")
                 .tasklet((contribution, chunkContext) -> {
-//                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    long count = 10;
                     List<InputDTO> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
@@ -87,7 +87,6 @@ public class JobJdbcReadWritePerformance {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.verifyFile")
                 .tasklet((contribution, chunkContext) -> {
-                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
                     ResultSet resultSet = preparedStatement.executeQuery();
