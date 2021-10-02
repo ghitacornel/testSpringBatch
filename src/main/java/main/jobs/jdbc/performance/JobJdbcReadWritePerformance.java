@@ -31,8 +31,6 @@ import java.util.List;
 @Configuration
 public class JobJdbcReadWritePerformance {
 
-    static long count = 10;
-
     @Autowired
     JobBuilderFactory jobBuilderFactory;
 
@@ -61,6 +59,7 @@ public class JobJdbcReadWritePerformance {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.createData")
                 .tasklet((contribution, chunkContext) -> {
+                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<InputDTO> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
@@ -85,7 +84,7 @@ public class JobJdbcReadWritePerformance {
 
     private Step verifyDatabase() {
         return stepBuilderFactory
-                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.verifyFile")
+                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformance.verifyDatabase")
                 .tasklet((contribution, chunkContext) -> {
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
@@ -94,6 +93,7 @@ public class JobJdbcReadWritePerformance {
                     long actualCount = resultSet.getLong(1);
                     preparedStatement.close();
                     connection.close();
+                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
