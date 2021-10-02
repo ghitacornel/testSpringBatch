@@ -14,7 +14,7 @@ public class JobJdbcReadWritePerformanceTest extends TestsConfiguration {
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("timestamp", System.currentTimeMillis())
-                .addLong("count", 1000L)
+                .addLong("count", 1000000L)
                 .toJobParameters();
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
