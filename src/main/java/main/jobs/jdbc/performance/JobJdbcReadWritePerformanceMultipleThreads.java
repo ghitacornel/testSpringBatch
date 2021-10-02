@@ -7,11 +7,9 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.H2PagingQueryProvider;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -23,7 +21,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -67,16 +64,31 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.createData")
                 .tasklet((contribution, chunkContext) -> {
+
+                    // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<InputDTO> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
                         list.add(inputDTO);
                     }
+
+                    //cleanup database
+                    {
+                        Connection connection = dataSourceH2.getConnection();
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("truncate table InputDTO");
+                        statement.close();
+                    }
+                    //cleanup database
+                    {
+                        Connection connection = dataSourceHSQL.getConnection();
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("truncate table OutputDTO");
+                        statement.close();
+                    }
+
                     Connection connection = dataSourceH2.getConnection();
-                    Statement statement = connection.createStatement();
-                    statement.executeUpdate("truncate table InputDTO");
-                    statement.close();
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
                         preparedStatement.setInt(1, inputDTO.getId());

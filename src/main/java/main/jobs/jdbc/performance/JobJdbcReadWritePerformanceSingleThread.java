@@ -58,16 +58,31 @@ public class JobJdbcReadWritePerformanceSingleThread {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.createData")
                 .tasklet((contribution, chunkContext) -> {
+
+                    // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<InputDTO> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
                         list.add(inputDTO);
                     }
+
+                    //cleanup database
+                    {
+                        Connection connection = dataSourceH2.getConnection();
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("truncate table InputDTO");
+                        statement.close();
+                    }
+                    //cleanup database
+                    {
+                        Connection connection = dataSourceHSQL.getConnection();
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("truncate table OutputDTO");
+                        statement.close();
+                    }
+
                     Connection connection = dataSourceH2.getConnection();
-                    Statement statement = connection.createStatement();
-                    statement.executeUpdate("truncate table InputDTO");
-                    statement.close();
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
                         preparedStatement.setInt(1, inputDTO.getId());
