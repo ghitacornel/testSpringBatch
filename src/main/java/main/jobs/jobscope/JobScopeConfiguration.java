@@ -21,11 +21,12 @@ public class JobScopeConfiguration {
     StepBuilderFactory steps;
 
     @Bean
-    public Job job(Step step1, Step step2) {
+    public Job job(Step step1, Step step2, JobListener jobListener) {
         return jobBuilderFactory.get("main.jobs.jobscope.JobScopeConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step1)
                 .next(step2)
+                .listener(jobListener)
                 .build();
     }
 
