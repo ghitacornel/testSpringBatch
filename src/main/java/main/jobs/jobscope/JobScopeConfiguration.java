@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class JobScopeConfiguration {
 
-
     @Autowired
     JobBuilderFactory jobBuilderFactory;
 
@@ -31,18 +30,20 @@ public class JobScopeConfiguration {
     }
 
     @Bean
-    Step step1(Tasklet1 tasklet) {
+    Step step1(Tasklet1 tasklet, Step1Listener listener) {
         return steps
                 .get("step1")
                 .tasklet(tasklet)
+                .listener(listener)
                 .build();
     }
 
     @Bean
-    Step step2(Tasklet2 tasklet) {
+    Step step2(Tasklet2 tasklet, Step2Listener listener) {
         return steps
                 .get("step2")
                 .tasklet(tasklet)
+                .listener(listener)
                 .build();
     }
 
