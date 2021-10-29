@@ -4,13 +4,18 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class Tasklet2 implements Tasklet {
+
+    @Autowired
+    BeanJobScoped beanJobScoped;
+
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        System.out.println("step 2 executed");
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
+        beanJobScoped.step2 = true;
         return RepeatStatus.FINISHED;
     }
 }

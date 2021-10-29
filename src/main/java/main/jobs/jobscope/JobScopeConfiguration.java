@@ -23,7 +23,7 @@ public class JobScopeConfiguration {
 
     @Bean
     public Job job(Step step1, Step step2) {
-        return jobBuilderFactory.get("main.jobs.decider.JobDeciderConfiguration")
+        return jobBuilderFactory.get("main.jobs.jobscope.JobScopeConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step1)
                 .next(step2)
