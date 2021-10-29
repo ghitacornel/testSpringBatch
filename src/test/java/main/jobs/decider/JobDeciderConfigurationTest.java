@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Iterator;
 
 @ActiveProfiles("main.jobs.decider.JobDeciderConfiguration")
-public class JobDeciderTest extends TestsConfiguration {
+public class JobDeciderConfigurationTest extends TestsConfiguration {
 
     @Test
     public void testJobPath2() throws Exception {
