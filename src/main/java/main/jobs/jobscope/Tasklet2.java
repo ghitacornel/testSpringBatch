@@ -10,8 +10,11 @@ import org.springframework.stereotype.Component;
 @Component
 class Tasklet2 implements Tasklet {
 
-    @Autowired
-    BeanJobScoped beanJobScoped;
+    final BeanJobScoped beanJobScoped;
+
+    public Tasklet2(BeanJobScoped beanJobScoped) {
+        this.beanJobScoped = beanJobScoped;
+    }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
