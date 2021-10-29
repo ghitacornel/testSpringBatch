@@ -1,11 +1,18 @@
 package main.jobs.jobscope;
 
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.stereotype.Component;
 
 @Component
 @JobScope
 public class BeanJobScoped {
+
+    final JobExecution jobExecution;
+
+    public BeanJobScoped(JobExecution jobExecution) {
+        this.jobExecution = jobExecution;
+    }
 
     boolean startJob;
     boolean startStep1;
