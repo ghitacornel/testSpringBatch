@@ -22,7 +22,7 @@ import java.util.Map;
 @EnableJpaRepositories(
         entityManagerFactoryRef = "h2EMFB",
         transactionManagerRef = "h2PTM",
-        basePackages = {"main.databases.h2.repositories"}
+        basePackages = {"jdbc.common.h2.repositories"}
 )
 @DependsOn({"flywayInitializer"})
 public class H2Configuration {

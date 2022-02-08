@@ -22,7 +22,7 @@ import java.util.Map;
 @EnableJpaRepositories(
         entityManagerFactoryRef = "hsqlEMFB",
         transactionManagerRef = "hsqlPTM",
-        basePackages = {"main.databases.hsql.repositories"}
+        basePackages = {"jdbc.common.hsql.repositories"}
 )
 @DependsOn({"flywayInitializer"})
 public class HSQLConfiguration {
