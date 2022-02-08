@@ -1,17 +1,15 @@
-package main.jobs.csv.performance;
+package csv.job;
 
-import main.jobs.TestsConfiguration;
+import csv.job.common.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
 import java.nio.file.Path;
 
-@ActiveProfiles("main.jobs.csv.performance.JobCsvReadWritePerformance")
-public class JobCsvReadWritePerformanceTest extends TestsConfiguration {
+public class JobConfigurationTest extends TestsConfiguration {
 
     @TempDir
     Path workingFolder;
@@ -31,7 +29,7 @@ public class JobCsvReadWritePerformanceTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.performance.JobCsvReadWritePerformance");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.performance.JobDefinition");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }

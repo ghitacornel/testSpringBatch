@@ -1,5 +1,6 @@
-package main.jobs.csv.performance;
+package csv.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -17,12 +18,10 @@ import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -33,19 +32,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-@Profile("main.jobs.csv.performance.JobCsvReadWritePerformance")
 @Configuration
-public class JobCsvReadWritePerformance {
+@RequiredArgsConstructor
+public class JobDefinition {
 
-    @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    StepBuilderFactory stepBuilderFactory;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job job(@Qualifier("step") Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.performance.JobCsvReadWritePerformance")
+        return jobBuilderFactory.get("main.jobs.csv.performance.JobDefinition")
                 .incrementer(new RunIdIncrementer())
                 .start(createData())
                 .next(step)
@@ -55,14 +51,14 @@ public class JobCsvReadWritePerformance {
 
     private Step createData() {
         return stepBuilderFactory
-                .get("main.jobs.csv.performance.JobCsvReadWritePerformance.createData")
+                .get("main.jobs.csv.performance.JobDefinition.createData")
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("inputPath");
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<String> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
-                        InputDTO inputDTO = InputDTO.generate();
-                        list.add(inputDTO.toCsv());
+                        InputData inputData = InputData.generate();
+                        list.add(inputData.toCsv());
                     }
                     FileWriter file = new FileWriter(inputPath);
                     for (String s : list) {
@@ -77,7 +73,7 @@ public class JobCsvReadWritePerformance {
 
     private Step verifyFile() {
         return stepBuilderFactory
-                .get("main.jobs.csv.performance.JobCsvReadWritePerformance.verifyFile")
+                .get("main.jobs.csv.performance.JobDefinition.verifyFile")
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("outputPath");
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -91,9 +87,9 @@ public class JobCsvReadWritePerformance {
     }
 
     @Bean
-    public Step step(ItemReader<InputDTO> reader, ItemProcessor<InputDTO, OutputDTO> processor, ItemWriter<OutputDTO> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.performance.JobCsvReadWritePerformance.step")
-                .<InputDTO, OutputDTO>chunk(1000)// larger is faster but requires more memory
+    public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
+        return stepBuilderFactory.get("main.jobs.csv.performance.JobDefinition.step")
+                .<InputData, OutputData>chunk(1000)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
@@ -104,9 +100,9 @@ public class JobCsvReadWritePerformance {
 
     @Bean
     @StepScope
-    public ItemProcessor<InputDTO, OutputDTO> processor() {
+    public ItemProcessor<InputData, OutputData> processor() {
         return input -> {
-            OutputDTO output = new OutputDTO();
+            OutputData output = new OutputData();
             output.setId(input.getId());
             output.setFirstName(input.getFirstName());
             output.setLastName(input.getLastName());
@@ -119,8 +115,8 @@ public class JobCsvReadWritePerformance {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<InputDTO> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
-        FlatFileItemReader<InputDTO> reader = new FlatFileItemReader<>();
+    public FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+        FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLineMapper(new DefaultLineMapper<>() {
             {
@@ -131,7 +127,7 @@ public class JobCsvReadWritePerformance {
                 });
                 setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
                     {
-                        setTargetType(InputDTO.class);
+                        setTargetType(InputData.class);
                     }
                 });
             }
@@ -141,8 +137,8 @@ public class JobCsvReadWritePerformance {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<OutputDTO> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
-        FlatFileItemWriter<OutputDTO> writer = new FlatFileItemWriter<>();
+    public FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+        FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
         writer.setAppendAllowed(false);
         writer.setLineAggregator(new DelimitedLineAggregator<>() {
