@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
-import org.springframework.batch.test.AssertFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +78,7 @@ public class JobConfigurationTest extends TestsConfiguration {
         Assertions.assertEquals(stepExecution.getReadCount(), 1000);
         Assertions.assertEquals(stepExecution.getWriteCount(), 997);
         Assertions.assertEquals(stepExecution.getFilterCount(), 3);
-        Assertions.assertEquals(stepExecution.getCommitCount(), 110);
+        Assertions.assertEquals(stepExecution.getCommitCount(), 111);
 
         // no more steps
         Assertions.assertFalse(stepExecutionIterator.hasNext());
