@@ -1,14 +1,12 @@
-package main.jobs.tasklet.fails;
+package tasklet.job;
 
-import main.jobs.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
-import org.springframework.test.context.ActiveProfiles;
+import tasklet.job.common.TestsConfiguration;
 
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.tasklet.fails.JobTaskletFailConfiguration")
 public class JobTaskletFailConfigurationTest extends TestsConfiguration {
 
     @Test
@@ -20,7 +18,7 @@ public class JobTaskletFailConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.tasklet.fails.JobTaskletFailConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "job.job.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "FAILED");
 
         Assertions.assertEquals(jobExecution.getFailureExceptions().size(), 0);

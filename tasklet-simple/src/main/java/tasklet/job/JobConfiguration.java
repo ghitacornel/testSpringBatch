@@ -1,29 +1,25 @@
-package main.jobs.tasklet;
+package tasklet.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-@Profile("main.jobs.tasklet.JobTaskletConfiguration")
 @Configuration
-public class JobTaskletConfiguration {
+@RequiredArgsConstructor
+public class JobConfiguration {
 
-    @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    StepBuilderFactory steps;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory steps;
 
     @Bean
     public Job job(JobTaskletExecutionListener job1ExecutionListener, JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
-        return jobBuilderFactory.get("main.jobs.tasklet.JobTaskletConfiguration")
+        return jobBuilderFactory.get("main.jobs.tasklet.JobConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step1(jobTaskletStepExecutionListener))
                 .next(step2())

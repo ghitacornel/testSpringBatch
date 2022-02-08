@@ -1,28 +1,24 @@
-package main.jobs.tasklet.fails;
+package job.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-@Profile("main.jobs.tasklet.fails.JobTaskletFailConfiguration")
 @Configuration
-public class JobTaskletFailConfiguration {
+@RequiredArgsConstructor
+public class JobConfiguration {
 
-    @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    StepBuilderFactory steps;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory steps;
 
     @Bean
     public Job job() {
-        return jobBuilderFactory.get("main.jobs.tasklet.fails.JobTaskletFailConfiguration")
+        return jobBuilderFactory.get("main.jobs.tasklet.fails.JobConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step())
                 .build();
