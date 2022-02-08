@@ -1,5 +1,6 @@
-package main.jobs.decider;
+package decider.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -8,26 +9,21 @@ import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import java.util.Objects;
 
-@Profile("main.jobs.decider.JobDeciderConfiguration")
 @Configuration
-public class JobDeciderConfiguration {
+@RequiredArgsConstructor
+public class JobConfiguration {
 
-    @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    StepBuilderFactory steps;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory steps;
 
     @Bean
     public Job job(JobExecutionDecider jobExecutionDecider) {
-        return jobBuilderFactory.get("main.jobs.decider.JobDeciderConfiguration")
+        return jobBuilderFactory.get("main.jobs.decider.JobConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .next(jobExecutionDecider).on("2").to(step2())

@@ -1,15 +1,13 @@
-package main.jobs.decider;
+package decider.job;
 
-import main.jobs.TestsConfiguration;
+import decider.job.common.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.decider.JobDeciderConfiguration")
-public class JobDeciderConfigurationTest extends TestsConfiguration {
+public class JobConfigurationTest extends TestsConfiguration {
 
     @Test
     public void testJobPath2() throws Exception {
@@ -24,7 +22,7 @@ public class JobDeciderConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobDeciderConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -67,7 +65,7 @@ public class JobDeciderConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobDeciderConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -114,7 +112,7 @@ public class JobDeciderConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobDeciderConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
