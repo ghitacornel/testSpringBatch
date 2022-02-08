@@ -8,7 +8,7 @@ import tasklet.job.common.TestsConfiguration;
 
 import java.util.Iterator;
 
-public class JobConfigurationTest extends TestsConfiguration {
+public class JobTaskletFailConfigurationTest extends TestsConfiguration {
 
     @Autowired
     JobTaskletExecutionListener jobExecutionListener;
