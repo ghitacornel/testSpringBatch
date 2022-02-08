@@ -16,14 +16,14 @@
     </parent>
 
     <modules>
-        <module>jdbc</module>
-        <module>csv-simple</module>
-        <module>csv-parallel</module>
-        <module>csv-performance</module>
         <module>tasklet-simple</module>
         <module>tasklet-fail</module>
         <module>decider-simple</module>
         <module>jobscope-simple</module>
+        <module>csv-simple</module>
+        <module>csv-parallel</module>
+        <module>csv-performance</module>
+        <module>jdbc</module>
     </modules>
 
     <properties>
