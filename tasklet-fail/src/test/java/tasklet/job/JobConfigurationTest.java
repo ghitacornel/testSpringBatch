@@ -7,7 +7,7 @@ import tasklet.job.common.TestsConfiguration;
 
 import java.util.Iterator;
 
-public class JobTaskletFailConfigurationTest extends TestsConfiguration {
+public class JobConfigurationTest extends TestsConfiguration {
 
     @Test
     public void testJob() throws Exception {
@@ -18,7 +18,7 @@ public class JobTaskletFailConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "job.job.JobConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.tasklet.fails.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "FAILED");
 
         Assertions.assertEquals(jobExecution.getFailureExceptions().size(), 0);
