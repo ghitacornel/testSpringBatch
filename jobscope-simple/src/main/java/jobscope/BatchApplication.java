@@ -1,4 +1,4 @@
-package decider;
+package jobscope;
 
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
