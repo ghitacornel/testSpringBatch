@@ -1,4 +1,4 @@
-package job.common;
+package tasklet.common;
 
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
