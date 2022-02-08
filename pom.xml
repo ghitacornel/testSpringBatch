@@ -23,6 +23,7 @@
         <module>tasklet-simple</module>
         <module>tasklet-fail</module>
         <module>decider-simple</module>
+        <module>jobscope-simple</module>
     </modules>
 
     <properties>

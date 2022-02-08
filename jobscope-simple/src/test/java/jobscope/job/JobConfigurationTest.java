@@ -1,16 +1,14 @@
-package main.jobs.jobscope;
+package jobscope.job;
 
-import main.jobs.TestsConfiguration;
+import jobscope.job.common.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("main.jobs.jobscope.JobScopeConfiguration")
-public class JobScopeConfigurationTest extends TestsConfiguration {
+public class JobConfigurationTest extends TestsConfiguration {
 
     @Test
     public void testJob() throws Exception {
@@ -21,7 +19,7 @@ public class JobScopeConfigurationTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jobscope.JobScopeConfiguration");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jobscope.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
     }
 }

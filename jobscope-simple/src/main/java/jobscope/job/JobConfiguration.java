@@ -1,28 +1,24 @@
-package main.jobs.jobscope;
+package jobscope.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-@Profile("main.jobs.jobscope.JobScopeConfiguration")
 @Configuration
-public class JobScopeConfiguration {
+@RequiredArgsConstructor
+public class JobConfiguration {
 
-    @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    StepBuilderFactory steps;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory steps;
 
     @Bean
     public Job job(Step step1, Step step2, JobListener jobListener) {
-        return jobBuilderFactory.get("main.jobs.jobscope.JobScopeConfiguration")
+        return jobBuilderFactory.get("main.jobs.jobscope.JobConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step1)
                 .next(step2)

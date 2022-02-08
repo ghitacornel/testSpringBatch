@@ -1,4 +1,4 @@
-package main.jobs.jobscope;
+package jobscope.job;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.configuration.annotation.JobScope;

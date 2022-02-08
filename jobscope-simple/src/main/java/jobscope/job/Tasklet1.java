@@ -1,4 +1,4 @@
-package main.jobs.jobscope;
+package jobscope.job;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -7,17 +7,17 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 
 @Component
-class Tasklet2 implements Tasklet {
+class Tasklet1 implements Tasklet {
 
     final BeanJobScoped beanJobScoped;
 
-    public Tasklet2(BeanJobScoped beanJobScoped) {
+    public Tasklet1(BeanJobScoped beanJobScoped) {
         this.beanJobScoped = beanJobScoped;
     }
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
-        beanJobScoped.step2 = true;
+        beanJobScoped.step1 = true;
         return RepeatStatus.FINISHED;
     }
 }
