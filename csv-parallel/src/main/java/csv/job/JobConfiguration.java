@@ -1,5 +1,6 @@
-package main.jobs.csv.parallel;
+package csv.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -16,11 +17,9 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -29,31 +28,25 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
 
-@Profile("main.jobs.csv.parallel.JobCsvReadWriteParallel")
 @Configuration
-public class JobCsvReadWriteParallel {
+@RequiredArgsConstructor
+public class JobConfiguration {
 
-    @Autowired
-    JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
-    Validator validator;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job job(Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.parallel.JobCsvReadWriteParallel")
+        return jobBuilderFactory.get("main.jobs.csv.parallel.JobConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
     }
 
     @Bean
-    public Step step(ItemReader<InputItem> reader, ItemProcessor<InputItem, OutputItem> processor, ItemWriter<OutputItem> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.parallel.JobCsvReadWriteParallel.step")
-                .<InputItem, OutputItem>chunk(10)// larger is faster but requires more memory
+    public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
+        return stepBuilderFactory.get("main.jobs.csv.parallel.JobConfiguration.step")
+                .<InputData, OutputData>chunk(10)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
@@ -64,16 +57,16 @@ public class JobCsvReadWriteParallel {
 
     @Bean
     @StepScope
-    public ItemProcessor<InputItem, OutputItem> processor() {
+    public ItemProcessor<InputData, OutputData> processor(Validator validator) {
         return input -> {
             {
-                Set<ConstraintViolation<InputItem>> violations = validator.validate(input);
+                Set<ConstraintViolation<InputData>> violations = validator.validate(input);
                 if (!violations.isEmpty()) {
                     System.err.println(violations);
                     return null;
                 }
             }
-            OutputItem output = new OutputItem();
+            OutputData output = new OutputData();
             output.setId(input.getId());
             output.setFirstName(input.getFirstName());
             output.setLastName(input.getLastName());
@@ -86,8 +79,8 @@ public class JobCsvReadWriteParallel {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<InputItem> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
-        FlatFileItemReader<InputItem> reader = new FlatFileItemReader<>();
+    public FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+        FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLinesToSkip(1);// skip header
         reader.setLineMapper(new DefaultLineMapper<>() {
@@ -99,7 +92,7 @@ public class JobCsvReadWriteParallel {
                 });
                 setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
                     {
-                        setTargetType(InputItem.class);
+                        setTargetType(InputData.class);
                     }
                 });
             }
@@ -109,8 +102,8 @@ public class JobCsvReadWriteParallel {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<OutputItem> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
-        FlatFileItemWriter<OutputItem> writer = new FlatFileItemWriter<>();
+    public FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+        FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
 
         // append or rewrite

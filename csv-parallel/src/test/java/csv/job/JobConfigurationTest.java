@@ -1,13 +1,13 @@
-package main.jobs.csv.parallel;
+package csv.job;
 
-import main.jobs.TestsConfiguration;
+import csv.job.common.TestsConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.batch.test.AssertFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,15 +19,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@ActiveProfiles("main.jobs.csv.parallel.JobCsvReadWriteParallel")
-public class JobCsvReadWriteParallelTest extends TestsConfiguration {
+public class JobConfigurationTest extends TestsConfiguration {
 
     @TempDir
     Path workingFolder;
 
     @BeforeEach
     public void writeFile() throws IOException {
-        Path input = Paths.get("src", "test", "resources", "csv", "parallel", "input.csv");
+        Path input = Paths.get("src", "test", "resources", "input.csv");
         Path output = Paths.get(workingFolder.toString(), "input.csv");
         Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
     }
@@ -68,7 +67,7 @@ public class JobCsvReadWriteParallelTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.parallel.JobCsvReadWriteParallel");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.parallel.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -76,7 +75,7 @@ public class JobCsvReadWriteParallelTest extends TestsConfiguration {
         // test step
         StepExecution stepExecution = stepExecutionIterator.next();
         Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.parallel.JobCsvReadWriteParallel.step");
+        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.parallel.JobConfiguration.step");
         Assertions.assertEquals(stepExecution.getReadCount(), 1000);
         Assertions.assertEquals(stepExecution.getWriteCount(), 997);
         Assertions.assertEquals(stepExecution.getFilterCount(), 3);

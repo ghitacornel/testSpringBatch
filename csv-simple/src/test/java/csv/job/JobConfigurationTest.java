@@ -24,14 +24,14 @@ public class JobConfigurationTest extends TestsConfiguration {
 
     @BeforeEach
     public void writeFile() throws IOException {
-        Path input = Paths.get("src", "test", "resources", "csv", "input.csv");
+        Path input = Paths.get("src", "test", "resources", "input.csv");
         Path output = Paths.get(workingFolder.toString(), "input.csv");
         Files.copy(input, output, StandardCopyOption.REPLACE_EXISTING);
     }
 
     @AfterEach
     public void checkFile() throws Exception {
-        Path input = Paths.get("src", "test", "resources", "csv", "output.csv");
+        Path input = Paths.get("src", "test", "resources", "output.csv");
         Path output = Paths.get(workingFolder.toString(), "output.csv");
         AssertFile.assertFileEquals(input.toFile(), output.toFile());
     }

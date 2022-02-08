@@ -18,6 +18,7 @@
     <modules>
         <module>etc</module>
         <module>csv-simple</module>
+        <module>csv-parallel</module>
     </modules>
 
     <properties>
