@@ -32,7 +32,6 @@ public class JobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final Validator validator;
 
     @Bean
     public Job job(Step step) {
@@ -53,8 +52,7 @@ public class JobConfiguration {
     }
 
     @Bean
-    @StepScope
-    public ItemProcessor<InputData, OutputData> processor() {
+    public ItemProcessor<InputData, OutputData> processor(Validator validator) {
         return input -> {
             {
                 Set<ConstraintViolation<InputData>> violations = validator.validate(input);
