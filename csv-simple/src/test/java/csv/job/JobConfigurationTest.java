@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 
-public class JobDefinitionTest extends TestsConfiguration {
+public class JobConfigurationTest extends TestsConfiguration {
 
     @TempDir
     Path workingFolder;
@@ -50,7 +50,7 @@ public class JobDefinitionTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.JobDefinition");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.JobConfiguration");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -58,7 +58,7 @@ public class JobDefinitionTest extends TestsConfiguration {
         // test step
         StepExecution stepExecution = stepExecutionIterator.next();
         Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobDefinition.step");
+        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobConfiguration.step");
         Assertions.assertEquals(stepExecution.getReadCount(), 1008);
         Assertions.assertEquals(stepExecution.getWriteCount(), 1000);
         Assertions.assertEquals(stepExecution.getFilterCount(), 8);

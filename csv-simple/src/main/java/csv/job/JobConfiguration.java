@@ -28,7 +28,7 @@ import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
-public class JobDefinition {
+public class JobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -36,7 +36,7 @@ public class JobDefinition {
 
     @Bean
     public Job job(Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.JobDefinition")
+        return jobBuilderFactory.get("main.jobs.csv.JobConfiguration")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
@@ -44,7 +44,7 @@ public class JobDefinition {
 
     @Bean
     public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.JobDefinition.step")
+        return stepBuilderFactory.get("main.jobs.csv.JobConfiguration.step")
                 .<InputData, OutputData>chunk(100)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
