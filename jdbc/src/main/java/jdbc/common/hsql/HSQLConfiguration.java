@@ -41,7 +41,7 @@ public class HSQLConfiguration {
         map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         return builder
                 .dataSource(dataSource)
-                .packages("main.databases.hsql.domain")
+                .packages("jdbc.common.hsql.domain")
                 .persistenceUnit("hsql")
                 .properties(map)
                 .build();

@@ -41,7 +41,7 @@ public class H2Configuration {
         map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder
                 .dataSource(dataSource)
-                .packages("main.databases.h2.domain")
+                .packages("jdbc.common.h2.domain")
                 .persistenceUnit("h2")
                 .properties(map)
                 .build();
