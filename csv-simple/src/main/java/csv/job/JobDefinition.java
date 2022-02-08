@@ -20,17 +20,15 @@ import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.FileSystemResource;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
 
-@Profile("main.jobs.csv.JobCsvReadWrite")
 @Configuration
 @RequiredArgsConstructor
-public class JobCsvReadWrite {
+public class JobDefinition {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -38,7 +36,7 @@ public class JobCsvReadWrite {
 
     @Bean
     public Job job(Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.JobCsvReadWrite")
+        return jobBuilderFactory.get("main.jobs.csv.JobDefinition")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
@@ -46,7 +44,7 @@ public class JobCsvReadWrite {
 
     @Bean
     public Step step(ItemReader<InputItem> reader, ItemProcessor<InputItem, OutputItem> processor, ItemWriter<OutputItem> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.JobCsvReadWrite.step")
+        return stepBuilderFactory.get("main.jobs.csv.JobDefinition.step")
                 .<InputItem, OutputItem>chunk(100)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)

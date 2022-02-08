@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
 import org.springframework.batch.test.AssertFile;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +17,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 
-@ActiveProfiles("main.jobs.csv.JobCsvReadWrite")
-public class JobCsvReadWriteTest extends TestsConfiguration {
+public class JobDefinitionTest extends TestsConfiguration {
 
     @TempDir
     Path workingFolder;
@@ -52,7 +50,7 @@ public class JobCsvReadWriteTest extends TestsConfiguration {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.JobCsvReadWrite");
+        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.JobDefinition");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
@@ -60,7 +58,7 @@ public class JobCsvReadWriteTest extends TestsConfiguration {
         // test step
         StepExecution stepExecution = stepExecutionIterator.next();
         Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobCsvReadWrite.step");
+        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobDefinition.step");
         Assertions.assertEquals(stepExecution.getReadCount(), 1008);
         Assertions.assertEquals(stepExecution.getWriteCount(), 1000);
         Assertions.assertEquals(stepExecution.getFilterCount(), 8);
