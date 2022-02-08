@@ -46,7 +46,9 @@ public class JobConfigurationTest extends TestsConfiguration {
         Assertions.assertTrue(inputIds.containsAll(outputIds));
         outputIds.add("id");
         outputIds.add("5");
+        outputIds.add("10");
         outputIds.add("15");
+        outputIds.add("20");
         outputIds.add("25");
         Assertions.assertTrue(inputIds.containsAll(outputIds));
         Assertions.assertTrue(outputIds.containsAll(inputIds));
@@ -76,8 +78,8 @@ public class JobConfigurationTest extends TestsConfiguration {
         Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
         Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.parallel.JobConfiguration.step");
         Assertions.assertEquals(stepExecution.getReadCount(), 1000);
-        Assertions.assertEquals(stepExecution.getWriteCount(), 997);
-        Assertions.assertEquals(stepExecution.getFilterCount(), 3);
+        Assertions.assertEquals(stepExecution.getWriteCount(), 995);
+        Assertions.assertEquals(stepExecution.getFilterCount(), 5);
         Assertions.assertEquals(stepExecution.getCommitCount(), 111);
 
         // no more steps
