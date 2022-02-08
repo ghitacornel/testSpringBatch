@@ -1,4 +1,4 @@
-package jobscope.common;
+package decider.common;
 
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;

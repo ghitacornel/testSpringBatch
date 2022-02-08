@@ -1,4 +1,4 @@
-package jobscope.common;
+package decider.common;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
