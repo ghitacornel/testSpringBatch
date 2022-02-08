@@ -3,7 +3,7 @@ package csv.job;
 import lombok.Data;
 
 @Data
-public class OutputItem {
+public class OutputData {
 
     private Integer id;
     private String firstName;

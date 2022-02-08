@@ -43,9 +43,9 @@ public class JobDefinition {
     }
 
     @Bean
-    public Step step(ItemReader<InputItem> reader, ItemProcessor<InputItem, OutputItem> processor, ItemWriter<OutputItem> writer) {
+    public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
         return stepBuilderFactory.get("main.jobs.csv.JobDefinition.step")
-                .<InputItem, OutputItem>chunk(100)// larger is faster but requires more memory
+                .<InputData, OutputData>chunk(100)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
@@ -54,16 +54,16 @@ public class JobDefinition {
 
     @Bean
     @StepScope
-    public ItemProcessor<InputItem, OutputItem> processor() {
+    public ItemProcessor<InputData, OutputData> processor() {
         return input -> {
             {
-                Set<ConstraintViolation<InputItem>> violations = validator.validate(input);
+                Set<ConstraintViolation<InputData>> violations = validator.validate(input);
                 if (!violations.isEmpty()) {
                     System.err.println(violations);
                     return null;
                 }
             }
-            OutputItem output = new OutputItem();
+            OutputData output = new OutputData();
             output.setId(input.getId());
             output.setFirstName(input.getFirstName());
             output.setLastName(input.getLastName());
@@ -76,8 +76,8 @@ public class JobDefinition {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<InputItem> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
-        FlatFileItemReader<InputItem> reader = new FlatFileItemReader<>();
+    public FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+        FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLinesToSkip(1);// skip header
         reader.setLineMapper(new DefaultLineMapper<>() {
@@ -89,7 +89,7 @@ public class JobDefinition {
                 });
                 setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
                     {
-                        setTargetType(InputItem.class);
+                        setTargetType(InputData.class);
                     }
                 });
             }
@@ -99,8 +99,8 @@ public class JobDefinition {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<OutputItem> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
-        FlatFileItemWriter<OutputItem> writer = new FlatFileItemWriter<>();
+    public FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+        FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
 
         // append or rewrite
