@@ -20,6 +20,7 @@
         <module>csv-simple</module>
         <module>csv-parallel</module>
         <module>csv-performance</module>
+        <module>tasklet-simple</module>
     </modules>
 
     <properties>
