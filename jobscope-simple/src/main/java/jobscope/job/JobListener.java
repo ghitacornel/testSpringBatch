@@ -1,17 +1,15 @@
 package jobscope.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.stereotype.Component;
 
 @Component
 @JobScope
+@RequiredArgsConstructor
 public class JobListener implements javax.batch.api.listener.JobListener {
 
-    final BeanJobScoped beanJobScoped;
-
-    public JobListener(BeanJobScoped beanJobScoped) {
-        this.beanJobScoped = beanJobScoped;
-    }
+    private final BeanJobScoped beanJobScoped;
 
     @Override
     public void beforeJob() {

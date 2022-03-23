@@ -1,5 +1,6 @@
 package jobscope.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -8,13 +9,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @StepScope
+@RequiredArgsConstructor
 public class Step2Listener implements StepExecutionListener {
 
-    final BeanJobScoped beanJobScoped;
-
-    public Step2Listener(BeanJobScoped beanJobScoped) {
-        this.beanJobScoped = beanJobScoped;
-    }
+    private final BeanJobScoped beanJobScoped;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
