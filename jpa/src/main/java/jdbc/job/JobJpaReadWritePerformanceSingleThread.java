@@ -1,5 +1,7 @@
 package jdbc.job;
 
+import jdbc.configuration.h2.repository.InputEntityRepository;
+import jdbc.configuration.hsql.repository.OutputEntityRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -20,7 +22,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,11 @@ public class JobJpaReadWritePerformanceSingleThread {
     @Qualifier("dataSourceHSQL")
     private DataSource dataSourceHSQL;
 
+    @Autowired
+    private InputEntityRepository inputEntityRepository;
+    @Autowired
+    private OutputEntityRepository outputEntityRepository;
+
     @Bean
     public Job job() {
         return jobBuilderFactory.get(JOB_NAME)
@@ -60,20 +66,10 @@ public class JobJpaReadWritePerformanceSingleThread {
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
-                    {
-                        Connection connection = dataSourceH2.getConnection();
-                        Statement statement = connection.createStatement();
-                        statement.executeUpdate("truncate table InputDTO");
-                        statement.close();
-                    }
+                    inputEntityRepository.deleteAll();
 
                     //cleanup OUTPUT database
-                    {
-                        Connection connection = dataSourceHSQL.getConnection();
-                        Statement statement = connection.createStatement();
-                        statement.executeUpdate("truncate table OutputDTO");
-                        statement.close();
-                    }
+                    outputEntityRepository.deleteAll();
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");

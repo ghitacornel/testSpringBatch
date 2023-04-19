@@ -1,8 +1,8 @@
 package jdbc.job;
 
 import jdbc.configuration.h2.entity.InputEntity;
-import jdbc.configuration.h2.repository.PersonH2Repository;
-import jdbc.configuration.hsql.repository.PersonHSQLRepository;
+import jdbc.configuration.h2.repository.InputEntityRepository;
+import jdbc.configuration.hsql.repository.OutputEntityRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -48,9 +48,9 @@ public class JobJpaReadWritePerformanceMultipleThreads {
     private DataSource dataSourceH2;
 
     @Autowired
-    private PersonH2Repository personH2Repository;
+    private InputEntityRepository inputEntityRepository;
     @Autowired
-    private PersonHSQLRepository personHSQLRepository;
+    private OutputEntityRepository outputEntityRepository;
 
     @Autowired
     @Qualifier("dataSourceHSQL")
@@ -72,10 +72,10 @@ public class JobJpaReadWritePerformanceMultipleThreads {
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
-                    personH2Repository.deleteAll();
+                    inputEntityRepository.deleteAll();
 
                     //cleanup OUTPUT database
-                    personHSQLRepository.deleteAll();
+                    outputEntityRepository.deleteAll();
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -92,7 +92,7 @@ public class JobJpaReadWritePerformanceMultipleThreads {
                     }
 
                     // write generated data
-                    personH2Repository.saveAll(list);
+                    inputEntityRepository.saveAll(list);
                     return RepeatStatus.FINISHED;
                 })
                 .build();
