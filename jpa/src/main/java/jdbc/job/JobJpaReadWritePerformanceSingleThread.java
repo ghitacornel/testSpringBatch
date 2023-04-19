@@ -41,11 +41,11 @@ public class JobJpaReadWritePerformanceSingleThread {
     private OutputEntityRepository outputEntityRepository;
 
     @Autowired
-    EntityManagerFactory h2EMFB;
+    private EntityManagerFactory h2EMFB;
     @Autowired
-    EntityManagerFactory hsqlEMFB;
+    private EntityManagerFactory hsqlEMFB;
     @Autowired
-    PlatformTransactionManager chainTxManager;
+    private PlatformTransactionManager chainTxManager;
 
     @Bean
     public Job job() {
