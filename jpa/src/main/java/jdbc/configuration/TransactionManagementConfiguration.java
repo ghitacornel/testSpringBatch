@@ -1,6 +1,5 @@
 package jdbc.configuration;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.transaction.ChainedTransactionManager;
@@ -26,6 +25,5 @@ public class TransactionManagementConfiguration {
     PlatformTransactionManager chainTxManager(JpaTransactionManager h2PTM, JpaTransactionManager hsqlPTM) {
         return new ChainedTransactionManager(h2PTM, hsqlPTM);
     }
-
 
 }
