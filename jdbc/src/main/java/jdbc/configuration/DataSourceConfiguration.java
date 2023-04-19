@@ -13,8 +13,7 @@ public class DataSourceConfiguration {
 
     // the default data source to be used by Spring Batch
     // Spring batch always needs at least 1 data source
-    @Primary
-    @Bean(name = "dataSource")// mandatory name "dataSource"
+    @Bean
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.apache.derby.jdbc.AutoloadedDriver");
