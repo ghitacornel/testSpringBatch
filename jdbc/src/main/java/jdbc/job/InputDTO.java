@@ -15,7 +15,7 @@ public class InputDTO {
     private long salary;
 
     private static final Faker faker = new Faker();
-    private static final AtomicInteger ids =new AtomicInteger(0);
+    private static final AtomicInteger ids = new AtomicInteger(0);
 
     public static InputDTO generate() {
         InputDTO inputDTO = new InputDTO();
