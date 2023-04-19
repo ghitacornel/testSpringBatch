@@ -103,13 +103,7 @@ public class JobJpaReadWritePerformanceMultipleThreads {
         return stepBuilderFactory
                 .get("verifyDatabaseStep")
                 .tasklet((contribution, chunkContext) -> {
-                    Connection connection = dataSourceHSQL.getConnection();
-                    PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
-                    ResultSet resultSet = preparedStatement.executeQuery();
-                    resultSet.next();
-                    long actualCount = resultSet.getLong(1);
-                    preparedStatement.close();
-                    connection.close();
+                    long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
