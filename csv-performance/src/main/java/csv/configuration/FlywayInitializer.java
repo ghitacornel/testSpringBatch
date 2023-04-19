@@ -1,4 +1,4 @@
-package csv.commons;
+package csv.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;

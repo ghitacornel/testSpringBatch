@@ -29,7 +29,6 @@ import org.springframework.core.task.TaskExecutor;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -55,11 +54,7 @@ public class JobDefinition {
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("inputPath");
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    List<String> list = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        InputData inputData = InputData.generate();
-                        list.add(inputData.toCsv());
-                    }
+                    List<String> list = InputGenerator.generate(count);
                     FileWriter file = new FileWriter(inputPath);
                     for (String s : list) {
                         file.write(s);
