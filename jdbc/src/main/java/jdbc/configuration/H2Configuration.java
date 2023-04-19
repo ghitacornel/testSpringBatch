@@ -1,4 +1,4 @@
-package jdbc.configuration.h2;
+package jdbc.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,7 +37,6 @@ public class H2Configuration {
         map.put("javax.persistence.schema-generation.database.action", "drop-and-create");
         map.put("hibernate.show_sql", "true");
         map.put("hibernate.format_sql", "true");
-//        map.put("javax.persistence.schema-generation.database.action", "validate");
         map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder
                 .dataSource(dataSource)
