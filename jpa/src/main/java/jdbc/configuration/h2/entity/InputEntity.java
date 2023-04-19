@@ -5,19 +5,17 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 @Entity
-@Table(name = "person_h2")
 @Getter
 @Setter
-public class PersonH2 {
+public class InputEntity {
 
     @Id
     private Integer id;
     private String firstName;
     private String lastName;
-    private double salary;
+    private int salary;
     private int age;
 
 }

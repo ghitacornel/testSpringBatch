@@ -1,7 +1,7 @@
 package jdbc.configuration.hsql.repository;
 
-import jdbc.configuration.hsql.entity.PersonHSQL;
+import jdbc.configuration.hsql.entity.OutputEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PersonHSQLRepository extends JpaRepository<PersonHSQL, Integer> {
+public interface PersonHSQLRepository extends JpaRepository<OutputEntity, Integer> {
 }

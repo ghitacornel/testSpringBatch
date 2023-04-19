@@ -1,6 +1,6 @@
 package jdbc.job;
 
-import jdbc.configuration.h2.entity.PersonH2;
+import jdbc.configuration.h2.entity.InputEntity;
 import jdbc.configuration.h2.repository.PersonH2Repository;
 import jdbc.configuration.hsql.repository.PersonHSQLRepository;
 import org.springframework.batch.core.Job;
@@ -79,16 +79,16 @@ public class JobJpaReadWritePerformanceMultipleThreads {
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    List<PersonH2> list = new ArrayList<>();
+                    List<InputEntity> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
-                        PersonH2 personH2 = new PersonH2();
-                        personH2.setId(inputDTO.getId());
-                        personH2.setFirstName(inputDTO.getFirstName());
-                        personH2.setLastName(inputDTO.getLastName());
-                        personH2.setAge(inputDTO.getAge());
-                        personH2.setSalary(inputDTO.getSalary());
-                        list.add(personH2);
+                        InputEntity inputEntity = new InputEntity();
+                        inputEntity.setId(inputDTO.getId());
+                        inputEntity.setFirstName(inputDTO.getFirstName());
+                        inputEntity.setLastName(inputDTO.getLastName());
+                        inputEntity.setAge(inputDTO.getAge());
+                        inputEntity.setSalary(inputDTO.getSalary());
+                        list.add(inputEntity);
                     }
 
                     // write generated data

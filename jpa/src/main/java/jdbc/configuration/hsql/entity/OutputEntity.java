@@ -3,16 +3,16 @@ package jdbc.configuration.hsql.entity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.math.BigDecimal;
 
 @Entity
-@Table(name = "person_hsql")
-public class PersonHSQL {
+public class OutputEntity {
 
     @Id
     private Integer id;
-    private String name;
-    private BigDecimal salary;
+    private String firstName;
+    private String lastName;
+    private int salary;
     private int age;
+    private int difference;
 
 }
