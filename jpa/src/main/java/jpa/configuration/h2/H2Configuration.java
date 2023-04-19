@@ -1,4 +1,4 @@
-package jdbc.configuration.hsql;
+package jpa.configuration.h2;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -14,24 +14,24 @@ import java.util.Map;
 
 @Configuration
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "hsqlEMFB",
-        transactionManagerRef = "hsqlPTM",
-        basePackages = {"jdbc.configuration.hsql"}
+        entityManagerFactoryRef = "h2EMFB",
+        transactionManagerRef = "h2PTM",
+        basePackages = {"jpa.configuration.h2"}
 )
 @DependsOn({"flywayInitializer"})
-public class HSQLConfiguration {
+public class H2Configuration {
 
     @Bean
-    LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("dataSourceHSQL") DataSource dataSource, EntityManagerFactoryBuilder builder) {
+    LocalContainerEntityManagerFactoryBean h2EMFB(@Qualifier("dataSourceH2") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
         map.put("javax.persistence.schema-generation.database.action", "validate");
-        map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+        map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder
                 .dataSource(dataSource)
-                .packages("jdbc.configuration.hsql.entity")
-                .persistenceUnit("hsql")
+                .packages("jpa.configuration.h2.entity")
+                .persistenceUnit("h2")
                 .properties(map)
                 .build();
     }

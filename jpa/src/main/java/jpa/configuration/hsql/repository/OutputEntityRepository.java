@@ -1,6 +1,6 @@
-package jdbc.configuration.hsql.repository;
+package jpa.configuration.hsql.repository;
 
-import jdbc.configuration.hsql.entity.OutputEntity;
+import jpa.configuration.hsql.entity.OutputEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OutputEntityRepository extends JpaRepository<OutputEntity, Integer> {

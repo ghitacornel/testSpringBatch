@@ -1,9 +1,9 @@
-package jdbc.job;
+package jpa.job;
 
-import jdbc.configuration.h2.entity.InputEntity;
-import jdbc.configuration.h2.repository.InputEntityRepository;
-import jdbc.configuration.hsql.entity.OutputEntity;
-import jdbc.configuration.hsql.repository.OutputEntityRepository;
+import jpa.configuration.h2.entity.InputEntity;
+import jpa.configuration.h2.repository.InputEntityRepository;
+import jpa.configuration.hsql.entity.OutputEntity;
+import jpa.configuration.hsql.repository.OutputEntityRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -14,26 +14,32 @@ import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
-import java.util.ArrayList;
+import javax.sql.DataSource;
 import java.util.List;
 
-@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
+@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
 @Configuration
-public class JobJpaReadWritePerformanceSingleThread {
+public class JobJpaReadWritePerformanceMultipleThreads {
 
-    static final String JOB_NAME = JobJpaReadWritePerformanceSingleThread.class.getName();
+    static final String JOB_NAME = JobJpaReadWritePerformanceMultipleThreads.class.getName();
 
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    @Qualifier("dataSourceH2")
+    private DataSource dataSourceH2;
 
     @Autowired
     private InputEntityRepository inputEntityRepository;
@@ -49,7 +55,7 @@ public class JobJpaReadWritePerformanceSingleThread {
 
     @Bean
     public Job job() {
-        return jobBuilderFactory.get(JOB_NAME)
+        return jobBuilderFactory.get(JobJpaReadWritePerformanceMultipleThreads.class.getName())
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -70,17 +76,7 @@ public class JobJpaReadWritePerformanceSingleThread {
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    List<InputEntity> list = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        InputDTO inputDTO = InputDTO.generate();
-                        InputEntity inputEntity = new InputEntity();
-                        inputEntity.setId(inputDTO.getId());
-                        inputEntity.setFirstName(inputDTO.getFirstName());
-                        inputEntity.setLastName(inputDTO.getLastName());
-                        inputEntity.setAge(inputDTO.getAge());
-                        inputEntity.setSalary(inputDTO.getSalary());
-                        list.add(inputEntity);
-                    }
+                    List<InputEntity> list = InputGenerator.generate(count);
 
                     // write generated data
                     inputEntityRepository.saveAll(list);
@@ -107,7 +103,7 @@ public class JobJpaReadWritePerformanceSingleThread {
     private Step processingStep() {
 
         JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
-        reader.setQueryString("select t from InputEntity t");
+        reader.setQueryString("select t from InputEntity t order by id");
         reader.setEntityManagerFactory(h2EMFB);
         reader.setPageSize(1000);
         reader.setSaveState(false);
@@ -124,7 +120,6 @@ public class JobJpaReadWritePerformanceSingleThread {
                 // larger is faster but requires more memory
                 .<InputEntity, OutputEntity>chunk(1000)
 
-                // reader/EXTRACT
                 .reader(reader)
 
                 // processor/TRANSFORM
@@ -141,6 +136,10 @@ public class JobJpaReadWritePerformanceSingleThread {
 
                 // writer/LOAD
                 .writer(writer)
+
+                // executor for parallel running
+                .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
+                .throttleLimit(5)
 
                 //job configuration done
                 .build();

@@ -1,13 +1,13 @@
-package jdbc.job;
+package jpa.job;
 
-import jdbc.job.jdbc.common.TestsConfiguration;
+import jpa.job.jdbc.common.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
-public class JobJpaReadWritePerformanceSingleThreadTest extends TestsConfiguration {
+@ActiveProfiles("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
+public class JobJpaReadWritePerformanceMultipleThreadsTest extends TestsConfiguration {
 
     @Test
     public void testJob() throws Exception {
@@ -22,7 +22,7 @@ public class JobJpaReadWritePerformanceSingleThreadTest extends TestsConfigurati
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), JobJpaReadWritePerformanceSingleThread.JOB_NAME);
+        Assertions.assertEquals(jobInstance.getJobName(), JobJpaReadWritePerformanceMultipleThreads.JOB_NAME);
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }

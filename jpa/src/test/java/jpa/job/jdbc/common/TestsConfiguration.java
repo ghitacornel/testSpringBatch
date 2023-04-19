@@ -1,4 +1,4 @@
-package jdbc.job.jdbc.common;
+package jpa.job.jdbc.common;
 
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;

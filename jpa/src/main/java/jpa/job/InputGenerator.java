@@ -1,30 +1,32 @@
-package jdbc.job;
+package jpa.job;
 
 import com.github.javafaker.Faker;
-import lombok.Data;
+import jpa.configuration.h2.entity.InputEntity;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-@Data
-public class InputDTO {
-
-    private Integer id;
-    private String firstName;
-    private String lastName;
-    private int age;
-    private int salary;
+public class InputGenerator {
 
     private static final Faker faker = new Faker();
     private static final AtomicInteger ids = new AtomicInteger(0);
 
-    public static InputDTO generate() {
-        InputDTO inputDTO = new InputDTO();
+    private static InputEntity generate() {
+        InputEntity inputDTO = new InputEntity();
         inputDTO.setId(ids.getAndIncrement());
         inputDTO.setFirstName(faker.name().firstName());
         inputDTO.setLastName(faker.name().lastName());
         inputDTO.setAge(faker.number().numberBetween(1, 100));
         inputDTO.setSalary(faker.number().numberBetween(1000, 20000));
         return inputDTO;
+    }
+
+    public static List<InputEntity> generate(long size) {
+        return IntStream.iterate(0, i -> i < size, i -> i + 1)
+                .mapToObj(i -> InputGenerator.generate())
+                .collect(Collectors.toList());
     }
 
 }
