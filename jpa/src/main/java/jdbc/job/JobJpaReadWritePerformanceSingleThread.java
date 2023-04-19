@@ -114,6 +114,7 @@ public class JobJpaReadWritePerformanceSingleThread {
 
         JpaItemWriter<OutputEntity> jpaItemWriter = new JpaItemWriter<>();
         jpaItemWriter.setEntityManagerFactory(hsqlEMFB);
+        jpaItemWriter.setUsePersist(true);
         try {
             jpaItemWriter.afterPropertiesSet();
         } catch (Exception e) {
