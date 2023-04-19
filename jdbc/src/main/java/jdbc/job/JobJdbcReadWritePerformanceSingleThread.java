@@ -77,11 +77,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    List<InputDTO> list = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        InputDTO inputDTO = InputDTO.generate();
-                        list.add(inputDTO);
-                    }
+                    List<InputDTO> list = InputGenerator.generate(count);
 
                     // write generated data
                     Connection connection = dataSourceH2.getConnection();
