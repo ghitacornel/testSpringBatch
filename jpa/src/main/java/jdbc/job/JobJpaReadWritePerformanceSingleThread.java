@@ -10,8 +10,8 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.JpaCursorItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -103,23 +103,25 @@ public class JobJpaReadWritePerformanceSingleThread {
 
     private Step processingStep() {
 
-        JpaCursorItemReader<InputEntity> jpaCursorItemReader = new JpaCursorItemReader<>();
-        jpaCursorItemReader.setQueryString("select t from InputEntity t");
-        jpaCursorItemReader.setEntityManagerFactory(h2EMFB);
-//        try {
-//            jpaCursorItemReader.afterPropertiesSet();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
+        reader.setQueryString("select t from InputEntity t");
+        reader.setEntityManagerFactory(h2EMFB);
+        reader.setPageSize(1000);
+        reader.setSaveState(false);
+        try {
+            reader.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-        JpaItemWriter<OutputEntity> jpaItemWriter = new JpaItemWriter<>();
-        jpaItemWriter.setEntityManagerFactory(hsqlEMFB);
-        jpaItemWriter.setUsePersist(true);
-//        try {
-//            jpaItemWriter.afterPropertiesSet();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+        JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
+        writer.setEntityManagerFactory(hsqlEMFB);
+        writer.setUsePersist(true);
+        try {
+            writer.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         return stepBuilderFactory.get("processingStep")
 
@@ -127,7 +129,7 @@ public class JobJpaReadWritePerformanceSingleThread {
                 .<InputEntity, OutputEntity>chunk(1000)
 
                 // reader/EXTRACT
-                .reader(jpaCursorItemReader)
+                .reader(reader)
 
                 // processor/TRANSFORM
                 .processor((ItemProcessor<InputEntity, OutputEntity>) input -> {
@@ -142,7 +144,7 @@ public class JobJpaReadWritePerformanceSingleThread {
                 })
 
                 // writer/LOAD
-                .writer(jpaItemWriter)
+                .writer(writer)
 
                 //job configuration done
                 .build();
