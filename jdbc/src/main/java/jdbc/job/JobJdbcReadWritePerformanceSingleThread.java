@@ -56,7 +56,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
 
     private Step createDataStep() {
         return stepBuilderFactory
-                .get(JOB_NAME + ".createDataStep")
+                .get("createDataStep")
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
@@ -103,7 +103,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
 
     private Step verifyDatabaseStep() {// only a count is performed as validation
         return stepBuilderFactory
-                .get(JOB_NAME + ".verifyDatabaseStep")
+                .get("verifyDatabaseStep")
                 .tasklet((contribution, chunkContext) -> {
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
@@ -122,7 +122,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
     }
 
     private Step processingStep() {
-        return stepBuilderFactory.get(JOB_NAME + ".processingStep")
+        return stepBuilderFactory.get("processingStep")
 
                 // larger is faster but requires more memory
                 .<InputDTO, OutputDTO>chunk(1000)
