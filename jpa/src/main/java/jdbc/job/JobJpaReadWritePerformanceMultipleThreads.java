@@ -1,5 +1,8 @@
 package jdbc.job;
 
+import jdbc.configuration.h2.entity.PersonH2;
+import jdbc.configuration.h2.repository.PersonH2Repository;
+import jdbc.configuration.hsql.repository.PersonHSQLRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -24,7 +27,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +48,11 @@ public class JobJpaReadWritePerformanceMultipleThreads {
     private DataSource dataSourceH2;
 
     @Autowired
+    private PersonH2Repository personH2Repository;
+    @Autowired
+    private PersonHSQLRepository personHSQLRepository;
+
+    @Autowired
     @Qualifier("dataSourceHSQL")
     private DataSource dataSourceHSQL;
 
@@ -65,42 +72,27 @@ public class JobJpaReadWritePerformanceMultipleThreads {
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
-                    {
-                        Connection connection = dataSourceH2.getConnection();
-                        Statement statement = connection.createStatement();
-                        statement.executeUpdate("truncate table InputDTO");
-                        statement.close();
-                    }
+                    personH2Repository.deleteAll();
 
                     //cleanup OUTPUT database
-                    {
-                        Connection connection = dataSourceHSQL.getConnection();
-                        Statement statement = connection.createStatement();
-                        statement.executeUpdate("truncate table OutputDTO");
-                        statement.close();
-                    }
+                    personHSQLRepository.deleteAll();
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    List<InputDTO> list = new ArrayList<>();
+                    List<PersonH2> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
-                        list.add(inputDTO);
+                        PersonH2 personH2 = new PersonH2();
+                        personH2.setId(inputDTO.getId());
+                        personH2.setFirstName(inputDTO.getFirstName());
+                        personH2.setLastName(inputDTO.getLastName());
+                        personH2.setAge(inputDTO.getAge());
+                        personH2.setSalary(inputDTO.getSalary());
+                        list.add(personH2);
                     }
 
                     // write generated data
-                    Connection connection = dataSourceH2.getConnection();
-                    PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
-                    for (InputDTO inputDTO : list) {
-                        preparedStatement.setInt(1, inputDTO.getId());
-                        preparedStatement.setString(2, inputDTO.getFirstName());
-                        preparedStatement.setString(3, inputDTO.getLastName());
-                        preparedStatement.setLong(4, inputDTO.getSalary());
-                        preparedStatement.setInt(5, inputDTO.getAge());
-                        preparedStatement.execute();
-                    }
-                    preparedStatement.close();
-                    connection.close();
+                    personH2Repository.saveAll(list);
                     return RepeatStatus.FINISHED;
                 })
                 .build();
