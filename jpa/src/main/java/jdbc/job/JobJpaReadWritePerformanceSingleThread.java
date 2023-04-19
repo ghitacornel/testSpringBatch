@@ -2,6 +2,7 @@ package jdbc.job;
 
 import jdbc.configuration.h2.entity.InputEntity;
 import jdbc.configuration.h2.repository.InputEntityRepository;
+import jdbc.configuration.hsql.entity.OutputEntity;
 import jdbc.configuration.hsql.repository.OutputEntityRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -9,20 +10,15 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.JpaCursorItemReader;
+import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,17 +35,14 @@ public class JobJpaReadWritePerformanceSingleThread {
     private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    @Qualifier("dataSourceH2")
-    private DataSource dataSourceH2;
-
-    @Autowired
-    @Qualifier("dataSourceHSQL")
-    private DataSource dataSourceHSQL;
-
-    @Autowired
     private InputEntityRepository inputEntityRepository;
     @Autowired
     private OutputEntityRepository outputEntityRepository;
+
+    @Autowired
+    EntityManagerFactory h2EMFB;
+    @Autowired
+    EntityManagerFactory hsqlEMFB;
 
     @Bean
     public Job job() {
@@ -109,22 +102,35 @@ public class JobJpaReadWritePerformanceSingleThread {
     }
 
     private Step processingStep() {
+
+        JpaCursorItemReader<InputEntity> jpaCursorItemReader = new JpaCursorItemReader<>();
+        jpaCursorItemReader.setQueryString("select t from InputEntity t");
+        jpaCursorItemReader.setEntityManagerFactory(h2EMFB);
+        try {
+            jpaCursorItemReader.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        JpaItemWriter<OutputEntity> jpaItemWriter = new JpaItemWriter<>();
+        jpaItemWriter.setEntityManagerFactory(hsqlEMFB);
+        try {
+            jpaItemWriter.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         return stepBuilderFactory.get("processingStep")
 
                 // larger is faster but requires more memory
-                .<InputDTO, OutputDTO>chunk(1000)
+                .<InputEntity, OutputEntity>chunk(1000)
 
                 // reader/EXTRACT
-                .reader(new JdbcCursorItemReaderBuilder<InputDTO>()
-                        .name("jdbcCursorItemReader")
-                        .dataSource(dataSourceH2)
-                        .sql("select * from InputDTO")// programmer is responsible for filtering the data to be processed
-                        .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
-                        .build())
+                .reader(jpaCursorItemReader)
 
                 // processor/TRANSFORM
-                .processor((ItemProcessor<InputDTO, OutputDTO>) input -> {
-                    OutputDTO output = new OutputDTO();
+                .processor((ItemProcessor<InputEntity, OutputEntity>) input -> {
+                    OutputEntity output = new OutputEntity();
                     output.setId(input.getId());
                     output.setFirstName(input.getFirstName());
                     output.setLastName(input.getLastName());
@@ -135,18 +141,7 @@ public class JobJpaReadWritePerformanceSingleThread {
                 })
 
                 // writer/LOAD
-                .writer(new JdbcBatchItemWriterBuilder<OutputDTO>()
-                        .dataSource(dataSourceHSQL)
-                        .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
-                        .itemPreparedStatementSetter((item, ps) -> {
-                            ps.setInt(1, item.getId());
-                            ps.setString(2, item.getFirstName());
-                            ps.setString(3, item.getLastName());
-                            ps.setLong(4, item.getSalary());
-                            ps.setInt(5, item.getAge());
-                            ps.setLong(6, item.getDifference());
-                        })
-                        .build())
+                .writer(jpaItemWriter)
 
                 //job configuration done
                 .build();
