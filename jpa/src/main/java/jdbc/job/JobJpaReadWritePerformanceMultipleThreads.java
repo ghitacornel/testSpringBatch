@@ -93,6 +93,7 @@ public class JobJpaReadWritePerformanceMultipleThreads {
 
                     // write generated data
                     inputEntityRepository.saveAll(list);
+
                     return RepeatStatus.FINISHED;
                 })
                 .build();

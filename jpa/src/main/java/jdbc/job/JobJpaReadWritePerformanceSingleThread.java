@@ -1,5 +1,6 @@
 package jdbc.job;
 
+import jdbc.configuration.h2.entity.InputEntity;
 import jdbc.configuration.h2.repository.InputEntityRepository;
 import jdbc.configuration.hsql.repository.OutputEntityRepository;
 import org.springframework.batch.core.Job;
@@ -73,25 +74,21 @@ public class JobJpaReadWritePerformanceSingleThread {
 
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    List<InputDTO> list = new ArrayList<>();
+                    List<InputEntity> list = new ArrayList<>();
                     for (int i = 0; i < count; i++) {
                         InputDTO inputDTO = InputDTO.generate();
-                        list.add(inputDTO);
+                        InputEntity inputEntity = new InputEntity();
+                        inputEntity.setId(inputDTO.getId());
+                        inputEntity.setFirstName(inputDTO.getFirstName());
+                        inputEntity.setLastName(inputDTO.getLastName());
+                        inputEntity.setAge(inputDTO.getAge());
+                        inputEntity.setSalary(inputDTO.getSalary());
+                        list.add(inputEntity);
                     }
 
                     // write generated data
-                    Connection connection = dataSourceH2.getConnection();
-                    PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
-                    for (InputDTO inputDTO : list) {
-                        preparedStatement.setInt(1, inputDTO.getId());
-                        preparedStatement.setString(2, inputDTO.getFirstName());
-                        preparedStatement.setString(3, inputDTO.getLastName());
-                        preparedStatement.setLong(4, inputDTO.getSalary());
-                        preparedStatement.setInt(5, inputDTO.getAge());
-                        preparedStatement.execute();
-                    }
-                    preparedStatement.close();
-                    connection.close();
+                    inputEntityRepository.saveAll(list);
+
                     return RepeatStatus.FINISHED;
                 })
                 .build();
