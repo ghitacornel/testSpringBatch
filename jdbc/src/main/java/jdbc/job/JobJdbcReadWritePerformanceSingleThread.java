@@ -6,8 +6,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -122,46 +120,40 @@ public class JobJdbcReadWritePerformanceSingleThread {
     private Step step() {
         return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.step")
                 .<InputDTO, OutputDTO>chunk(1000)// larger is faster but requires more memory
-                .reader(reader())
-                .processor(processor())
-                .writer(writer())
-                .build();
-    }
 
-    private JdbcCursorItemReader<InputDTO> reader() {
-        return new JdbcCursorItemReaderBuilder<InputDTO>()
-                .name("jdbcCursorItemReader")
-                .dataSource(dataSourceH2)
-                .sql("select * from InputDTO")
-                .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
-                .build();
-    }
+                // reader/EXTRACT
+                .reader(new JdbcCursorItemReaderBuilder<InputDTO>()
+                        .name("jdbcCursorItemReader")
+                        .dataSource(dataSourceH2)
+                        .sql("select * from InputDTO")// programmer is responsible for filtering the data to be processed
+                        .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
+                        .build())
 
-    private ItemProcessor<InputDTO, OutputDTO> processor() {
-        return input -> {
-            OutputDTO output = new OutputDTO();
-            output.setId(input.getId());
-            output.setFirstName(input.getFirstName());
-            output.setLastName(input.getLastName());
-            output.setAge(input.getAge() + 1);
-            output.setSalary(input.getSalary() + 2);
-            output.setDifference(output.getSalary() - output.getAge());
-            return output;
-        };
-    }
-
-    private JdbcBatchItemWriter<OutputDTO> writer() {
-        return new JdbcBatchItemWriterBuilder<OutputDTO>()
-                .itemPreparedStatementSetter((item, ps) -> {
-                    ps.setInt(1, item.getId());
-                    ps.setString(2, item.getFirstName());
-                    ps.setString(3, item.getLastName());
-                    ps.setLong(4, item.getSalary());
-                    ps.setInt(5, item.getAge());
-                    ps.setLong(6, item.getDifference());
+                // processor/TRANSFORM
+                .processor((ItemProcessor<InputDTO, OutputDTO>) input -> {
+                    OutputDTO output = new OutputDTO();
+                    output.setId(input.getId());
+                    output.setFirstName(input.getFirstName());
+                    output.setLastName(input.getLastName());
+                    output.setAge(input.getAge() + 1);
+                    output.setSalary(input.getSalary() + 2);
+                    output.setDifference(output.getSalary() - output.getAge());
+                    return output;
                 })
-                .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
-                .dataSource(dataSourceHSQL)
+
+                // writer/LOAD
+                .writer(new JdbcBatchItemWriterBuilder<OutputDTO>()
+                        .dataSource(dataSourceHSQL)
+                        .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
+                        .itemPreparedStatementSetter((item, ps) -> {
+                            ps.setInt(1, item.getId());
+                            ps.setString(2, item.getFirstName());
+                            ps.setString(3, item.getLastName());
+                            ps.setLong(4, item.getSalary());
+                            ps.setInt(5, item.getAge());
+                            ps.setLong(6, item.getDifference());
+                        })
+                        .build())
                 .build();
     }
 
