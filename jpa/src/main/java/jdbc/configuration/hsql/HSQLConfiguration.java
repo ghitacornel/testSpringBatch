@@ -34,8 +34,8 @@ public class HSQLConfiguration {
     @Bean
     LocalContainerEntityManagerFactoryBean hsqlEMFB(EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
-        map.put("hibernate.show_sql", "true");
-        map.put("hibernate.format_sql", "true");
+        map.put("hibernate.show_sql", "false");
+        map.put("hibernate.format_sql", "false");
         map.put("javax.persistence.schema-generation.database.action", "validate");
         map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         return builder

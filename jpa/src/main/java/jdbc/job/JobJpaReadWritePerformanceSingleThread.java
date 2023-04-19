@@ -106,20 +106,20 @@ public class JobJpaReadWritePerformanceSingleThread {
         JpaCursorItemReader<InputEntity> jpaCursorItemReader = new JpaCursorItemReader<>();
         jpaCursorItemReader.setQueryString("select t from InputEntity t");
         jpaCursorItemReader.setEntityManagerFactory(h2EMFB);
-        try {
-            jpaCursorItemReader.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            jpaCursorItemReader.afterPropertiesSet();
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         JpaItemWriter<OutputEntity> jpaItemWriter = new JpaItemWriter<>();
         jpaItemWriter.setEntityManagerFactory(hsqlEMFB);
         jpaItemWriter.setUsePersist(true);
-        try {
-            jpaItemWriter.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            jpaItemWriter.afterPropertiesSet();
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
         return stepBuilderFactory.get("processingStep")
 
