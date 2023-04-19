@@ -1,4 +1,4 @@
-package csv.common;
+package csv.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
@@ -16,13 +16,11 @@ public class FlywayInitializer {
 
     @PostConstruct
     public void migrateFlyway() {
-
         ClassicConfiguration configuration = new ClassicConfiguration();
         configuration.setDataSource(dataSource);
         configuration.setLocationsAsStrings("db/migration/batch");
         configuration.setBaselineOnMigrate(true);
         Flyway flyway = new Flyway(configuration);
         flyway.migrate();
-
     }
 }

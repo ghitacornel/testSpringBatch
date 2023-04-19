@@ -1,4 +1,4 @@
-package csv.common;
+package csv.configuration;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -13,7 +13,7 @@ public class DataSourceConfiguration {
     @Bean
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
+        config.setDriverClassName("org.apache.derby.jdbc.AutoloadedDriver");
         config.setJdbcUrl("jdbc:derby:memory:demo;create=true");
         return new HikariDataSource(config);
     }
