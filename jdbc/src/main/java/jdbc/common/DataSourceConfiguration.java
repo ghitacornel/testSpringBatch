@@ -17,7 +17,7 @@ public class DataSourceConfiguration {
     @Bean(name = "dataSource")// mandatory name "dataSource"
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
-        config.setDriverClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
+        config.setDriverClassName("org.apache.derby.jdbc.AutoloadedDriver");
         config.setJdbcUrl("jdbc:derby:memory:demo;create=true");
         return new HikariDataSource(config);
     }
