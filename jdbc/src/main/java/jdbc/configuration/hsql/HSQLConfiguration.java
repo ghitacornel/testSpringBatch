@@ -1,4 +1,4 @@
-package jdbc.common.hsql;
+package jdbc.configuration.hsql;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,14 +22,14 @@ import java.util.Map;
 @EnableJpaRepositories(
         entityManagerFactoryRef = "hsqlEMFB",
         transactionManagerRef = "hsqlPTM",
-        basePackages = {"jdbc.common.hsql"}
+        basePackages = {"jdbc.configuration.hsql"}
 )
 @DependsOn({"flywayInitializer"})
 public class HSQLConfiguration {
 
     @Autowired
     @Qualifier("dataSourceHSQL")
-    DataSource dataSource;
+    private DataSource dataSource;
 
     @Bean
     LocalContainerEntityManagerFactoryBean hsqlEMFB(EntityManagerFactoryBuilder builder) {
@@ -41,7 +41,7 @@ public class HSQLConfiguration {
         map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         return builder
                 .dataSource(dataSource)
-                .packages("jdbc.common.hsql.domain")
+                .packages("jdbc.common.hsql.entity")
                 .persistenceUnit("hsql")
                 .properties(map)
                 .build();

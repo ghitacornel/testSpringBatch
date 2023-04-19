@@ -1,4 +1,4 @@
-package jdbc.common.h2;
+package jdbc.configuration.h2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,14 +22,14 @@ import java.util.Map;
 @EnableJpaRepositories(
         entityManagerFactoryRef = "h2EMFB",
         transactionManagerRef = "h2PTM",
-        basePackages = {"jdbc.common.h2"}
+        basePackages = {"jdbc.configuration.h2"}
 )
 @DependsOn({"flywayInitializer"})
 public class H2Configuration {
 
     @Autowired
     @Qualifier("dataSourceH2")
-    DataSource dataSource;
+    private DataSource dataSource;
 
     @Bean
     LocalContainerEntityManagerFactoryBean h2EMFB(EntityManagerFactoryBuilder builder) {
@@ -41,7 +41,7 @@ public class H2Configuration {
         map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder
                 .dataSource(dataSource)
-                .packages("jdbc.common.h2.domain")
+                .packages("jdbc.common.h2.entity")
                 .persistenceUnit("h2")
                 .properties(map)
                 .build();

@@ -1,4 +1,4 @@
-package jdbc.common.flyway;
+package jdbc.configuration.flyway;
 
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.ClassicConfiguration;

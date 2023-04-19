@@ -1,4 +1,4 @@
-package jdbc.common.hsql.domain;
+package jdbc.configuration.hsql.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
