@@ -1,0 +1,2 @@
+CREATE TABLE person_hsql (ID INT PRIMARY KEY, name VARCHAR(50), salary DECIMAL, age int);
+CREATE TABLE OutputDTO (id INT PRIMARY KEY, firstName VARCHAR(50), lastName VARCHAR(50), salary int, age int, difference int);

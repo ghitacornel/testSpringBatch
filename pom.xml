@@ -18,6 +18,7 @@
         <module>csv-parallel</module>
         <module>csv-performance</module>
         <module>jdbc</module>
+        <module>jpa</module>
     </modules>
 
     <properties>
