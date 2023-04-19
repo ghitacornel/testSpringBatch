@@ -99,6 +99,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                     }
                     preparedStatement.close();
                     connection.close();
+
                     return RepeatStatus.FINISHED;
                 })
                 .build();
