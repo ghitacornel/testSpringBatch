@@ -128,6 +128,15 @@ public class JobJdbcReadWritePerformanceSingleThread {
                 .build();
     }
 
+    private JdbcCursorItemReader<InputDTO> reader() {
+        return new JdbcCursorItemReaderBuilder<InputDTO>()
+                .name("jdbcCursorItemReader")
+                .dataSource(dataSourceH2)
+                .sql("select * from InputDTO")
+                .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
+                .build();
+    }
+
     private ItemProcessor<InputDTO, OutputDTO> processor() {
         return input -> {
             OutputDTO output = new OutputDTO();
@@ -139,15 +148,6 @@ public class JobJdbcReadWritePerformanceSingleThread {
             output.setDifference(output.getSalary() - output.getAge());
             return output;
         };
-    }
-
-    private JdbcCursorItemReader<InputDTO> reader() {
-        return new JdbcCursorItemReaderBuilder<InputDTO>()
-                .name("jdbcCursorItemReader")
-                .dataSource(dataSourceH2)
-                .sql("select * from InputDTO")
-                .rowMapper(new BeanPropertyRowMapper<>(InputDTO.class))
-                .build();
     }
 
     private JdbcBatchItemWriter<OutputDTO> writer() {
