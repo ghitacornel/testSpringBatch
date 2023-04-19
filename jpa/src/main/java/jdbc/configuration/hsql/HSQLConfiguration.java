@@ -27,12 +27,8 @@ import java.util.Map;
 @DependsOn({"flywayInitializer"})
 public class HSQLConfiguration {
 
-    @Autowired
-    @Qualifier("dataSourceHSQL")
-    private DataSource dataSource;
-
     @Bean
-    LocalContainerEntityManagerFactoryBean hsqlEMFB(EntityManagerFactoryBuilder builder) {
+    LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("dataSourceHSQL") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
