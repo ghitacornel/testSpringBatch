@@ -22,7 +22,7 @@ public class JobJdbcReadWritePerformanceMultipleThreadsTest extends TestsConfigu
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads");
+        Assertions.assertEquals(jobInstance.getJobName(), JobJdbcReadWritePerformanceMultipleThreads.JOB_NAME);
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }

@@ -22,7 +22,7 @@ public class JobJdbcReadWritePerformanceSingleThreadTest extends TestsConfigurat
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread");
+        Assertions.assertEquals(jobInstance.getJobName(), JobJdbcReadWritePerformanceSingleThread.JOB_NAME);
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }

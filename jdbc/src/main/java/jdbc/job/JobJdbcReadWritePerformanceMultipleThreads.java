@@ -31,6 +31,8 @@ import java.util.*;
 @Configuration
 public class JobJdbcReadWritePerformanceMultipleThreads {
 
+    static final String JOB_NAME = JobJdbcReadWritePerformanceMultipleThreads.class.getName();
+
     @Autowired
     private JobBuilderFactory jobBuilderFactory;
 
@@ -47,7 +49,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
 
     @Bean
     public Job job() {
-        return jobBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
+        return jobBuilderFactory.get(JOB_NAME)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -57,7 +59,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
 
     private Step createDataStep() {
         return stepBuilderFactory
-                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.createData")
+                .get(JOB_NAME + ".createDataStep")
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
@@ -104,7 +106,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
 
     private Step verifyDatabaseStep() {// only a count is performed as validation
         return stepBuilderFactory
-                .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.verifyDatabase")
+                .get(JOB_NAME + ".verifyDatabaseStep")
                 .tasklet((contribution, chunkContext) -> {
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
@@ -123,7 +125,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
     }
 
     private Step processingStep() {
-        return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.step")
+        return stepBuilderFactory.get(JOB_NAME + ".processingStep")
 
                 // larger is faster but requires more memory
                 .<InputDTO, OutputDTO>chunk(1000)
