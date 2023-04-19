@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ public class JobJpaReadWritePerformanceSingleThread {
     EntityManagerFactory h2EMFB;
     @Autowired
     EntityManagerFactory hsqlEMFB;
+    @Autowired
+    PlatformTransactionManager chainTxManager;
 
     @Bean
     public Job job() {
@@ -108,22 +111,15 @@ public class JobJpaReadWritePerformanceSingleThread {
         reader.setEntityManagerFactory(h2EMFB);
         reader.setPageSize(1000);
         reader.setSaveState(false);
-        try {
-            reader.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(hsqlEMFB);
         writer.setUsePersist(true);
-        try {
-            writer.afterPropertiesSet();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         return stepBuilderFactory.get("processingStep")
+
+                // distributed transaction management since we are using 2 different databases
+                .transactionManager(chainTxManager)
 
                 // larger is faster but requires more memory
                 .<InputEntity, OutputEntity>chunk(1000)
