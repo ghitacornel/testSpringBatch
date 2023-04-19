@@ -1,28 +1,21 @@
 package jdbc.configuration;
 
+import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.ClassicConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 @Configuration
+@RequiredArgsConstructor
 public class FlywayInitializer {
 
-    @Autowired
-    @Qualifier("dataSource")
-    private DataSource dataSource;
 
-    @Autowired
-    @Qualifier("dataSourceH2")
-    private DataSource dataSourceH2;
-
-    @Autowired
-    @Qualifier("dataSourceHSQL")
-    private DataSource dataSourceHSQL;
+    private final DataSource dataSource;
+    private final DataSource dataSourceH2;
+    private final DataSource dataSourceHSQL;
 
     @PostConstruct
     public void migrateFlyway() {
