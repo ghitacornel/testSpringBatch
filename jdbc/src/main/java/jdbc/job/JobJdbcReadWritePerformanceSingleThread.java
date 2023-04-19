@@ -46,13 +46,13 @@ public class JobJdbcReadWritePerformanceSingleThread {
     public Job job() {
         return jobBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
                 .incrementer(new RunIdIncrementer())
-                .start(createData())
-                .next(step())
-                .next(verifyDatabase())
+                .start(createDataStep())
+                .next(processingStep())
+                .next(verifyDatabaseStep())
                 .build();
     }
 
-    private Step createData() {
+    private Step createDataStep() {
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.createData")
                 .tasklet((contribution, chunkContext) -> {
@@ -99,7 +99,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
                 .build();
     }
 
-    private Step verifyDatabase() {// only a count is performed as validation
+    private Step verifyDatabaseStep() {// only a count is performed as validation
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.verifyDatabase")
                 .tasklet((contribution, chunkContext) -> {
@@ -119,7 +119,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
                 .build();
     }
 
-    private Step step() {
+    private Step processingStep() {
         return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread.step")
 
                 // larger is faster but requires more memory
