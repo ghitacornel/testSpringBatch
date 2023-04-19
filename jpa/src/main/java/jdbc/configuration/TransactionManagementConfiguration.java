@@ -13,22 +13,18 @@ import javax.persistence.EntityManagerFactory;
 public class TransactionManagementConfiguration {
 
     @Bean
-    JpaTransactionManager h2PTM(@Qualifier("h2EMFB") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
+    JpaTransactionManager h2PTM(EntityManagerFactory h2EMFB) {
+        return new JpaTransactionManager(h2EMFB);
     }
 
     @Bean
-    JpaTransactionManager hsqlPTM(@Qualifier("hsqlEMFB") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
+    JpaTransactionManager hsqlPTM(EntityManagerFactory hsqlEMFB) {
+        return new JpaTransactionManager(hsqlEMFB);
     }
 
     @Bean
     PlatformTransactionManager chainTxManager(JpaTransactionManager h2PTM, JpaTransactionManager hsqlPTM) {
-        ChainedTransactionManager txManager =
-                new ChainedTransactionManager(
-                        h2PTM, hsqlPTM
-                );
-        return txManager;
+        return new ChainedTransactionManager(h2PTM, hsqlPTM);
     }
 
 

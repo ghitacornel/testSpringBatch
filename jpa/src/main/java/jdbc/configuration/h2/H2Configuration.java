@@ -7,14 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableTransactionManagement
 @EnableJpaRepositories(
         entityManagerFactoryRef = "h2EMFB",
         transactionManagerRef = "h2PTM",
