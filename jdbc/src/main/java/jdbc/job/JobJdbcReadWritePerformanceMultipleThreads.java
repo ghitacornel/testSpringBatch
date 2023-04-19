@@ -6,7 +6,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import javax.sql.DataSource;
@@ -27,10 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
 @Configuration
@@ -65,6 +60,22 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.createData")
                 .tasklet((contribution, chunkContext) -> {
 
+                    //cleanup INPUT database
+                    {
+                        Connection connection = dataSourceH2.getConnection();
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("truncate table InputDTO");
+                        statement.close();
+                    }
+
+                    //cleanup OUTPUT database
+                    {
+                        Connection connection = dataSourceHSQL.getConnection();
+                        Statement statement = connection.createStatement();
+                        statement.executeUpdate("truncate table OutputDTO");
+                        statement.close();
+                    }
+
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     List<InputDTO> list = new ArrayList<>();
@@ -73,21 +84,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                         list.add(inputDTO);
                     }
 
-                    //cleanup database
-                    {
-                        Connection connection = dataSourceH2.getConnection();
-                        Statement statement = connection.createStatement();
-                        statement.executeUpdate("truncate table InputDTO");
-                        statement.close();
-                    }
-                    //cleanup database
-                    {
-                        Connection connection = dataSourceHSQL.getConnection();
-                        Statement statement = connection.createStatement();
-                        statement.executeUpdate("truncate table OutputDTO");
-                        statement.close();
-                    }
-
+                    // write generated data
                     Connection connection = dataSourceH2.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("insert into InputDTO(ID,firstName,lastName,salary,age) values(?,?,?,?,?)");
                     for (InputDTO inputDTO : list) {
@@ -105,7 +102,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                 .build();
     }
 
-    private Step verifyDatabase() {
+    private Step verifyDatabase() {// only a count is performed as validation
         return stepBuilderFactory
                 .get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.verifyDatabase")
                 .tasklet((contribution, chunkContext) -> {
@@ -127,37 +124,53 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
 
     private Step step() {
         return stepBuilderFactory.get("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads.step")
-                .<InputDTO, OutputDTO>chunk(1000)// larger is faster but requires more memory
-                .reader(reader())
-                .processor(processor())
-                .writer(writer())
-                .taskExecutor(taskExecutor())
-                .throttleLimit(5)
-                .build();
-    }
 
-    private ItemProcessor<InputDTO, OutputDTO> processor() {
-        return input -> {
-            OutputDTO output = new OutputDTO();
-            output.setId(input.getId());
-            output.setFirstName(input.getFirstName());
-            output.setLastName(input.getLastName());
-            output.setAge(input.getAge() + 1);
-            output.setSalary(input.getSalary() + 2);
-            output.setDifference(output.getSalary() - output.getAge());
-            return output;
-        };
+                // larger is faster but requires more memory
+                .<InputDTO, OutputDTO>chunk(1000)
+
+                .reader(reader())
+
+                // processor/TRANSFORM
+                .processor((ItemProcessor<InputDTO, OutputDTO>) input -> {
+                    OutputDTO output = new OutputDTO();
+                    output.setId(input.getId());
+                    output.setFirstName(input.getFirstName());
+                    output.setLastName(input.getLastName());
+                    output.setAge(input.getAge() + 1);
+                    output.setSalary(input.getSalary() + 2);
+                    output.setDifference(output.getSalary() - output.getAge());
+                    return output;
+                })
+
+                // writer/LOAD
+                .writer(new JdbcBatchItemWriterBuilder<OutputDTO>()
+                        .dataSource(dataSourceHSQL)
+                        .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
+                        .itemPreparedStatementSetter((item, ps) -> {
+                            ps.setInt(1, item.getId());
+                            ps.setString(2, item.getFirstName());
+                            ps.setString(3, item.getLastName());
+                            ps.setLong(4, item.getSalary());
+                            ps.setInt(5, item.getAge());
+                            ps.setLong(6, item.getDifference());
+                        })
+                        .build())
+
+                // executor for parallel running
+                .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
+                .throttleLimit(5)
+
+                //job configuration done
+                .build();
     }
 
     private JdbcPagingItemReader<InputDTO> reader() {
 
-        Map<String, Order> sort = new HashMap<>(1);
-        sort.put("id", Order.ASCENDING);
-
         H2PagingQueryProvider queryProvider = new H2PagingQueryProvider();
         queryProvider.setSelectClause("*");
         queryProvider.setFromClause("InputDTO");
-        queryProvider.setSortKeys(sort);
+        queryProvider.setSortKeys(Collections.singletonMap("id", Order.ASCENDING));// need an order due to pagination
+        queryProvider.setWhereClause("");// programmer is responsible for filtering the data to be processed
 
         JdbcPagingItemReader<InputDTO> jdbcPagingItemReader = new JdbcPagingItemReaderBuilder<InputDTO>()
                 .name("jdbcPagingItemReader")
@@ -178,25 +191,6 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
         }
 
         return jdbcPagingItemReader;
-    }
-
-    private JdbcBatchItemWriter<OutputDTO> writer() {
-        return new JdbcBatchItemWriterBuilder<OutputDTO>()
-                .itemPreparedStatementSetter((item, ps) -> {
-                    ps.setInt(1, item.getId());
-                    ps.setString(2, item.getFirstName());
-                    ps.setString(3, item.getLastName());
-                    ps.setLong(4, item.getSalary());
-                    ps.setInt(5, item.getAge());
-                    ps.setLong(6, item.getDifference());
-                })
-                .sql("INSERT INTO OutputDTO(id,firstName,lastName,salary,age,difference) VALUES (?,?,?,?,?,?)")
-                .dataSource(dataSourceHSQL)
-                .build();
-    }
-
-    private TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor("performanceTaskExecutor");
     }
 
 }
