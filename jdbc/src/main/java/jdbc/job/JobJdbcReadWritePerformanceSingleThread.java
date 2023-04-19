@@ -29,18 +29,18 @@ import java.util.List;
 public class JobJdbcReadWritePerformanceSingleThread {
 
     @Autowired
-    JobBuilderFactory jobBuilderFactory;
+    private JobBuilderFactory jobBuilderFactory;
 
     @Autowired
-    StepBuilderFactory stepBuilderFactory;
+    private StepBuilderFactory stepBuilderFactory;
 
     @Autowired
     @Qualifier("dataSourceH2")
-    DataSource dataSourceH2;
+    private DataSource dataSourceH2;
 
     @Autowired
     @Qualifier("dataSourceHSQL")
-    DataSource dataSourceHSQL;
+    private DataSource dataSourceHSQL;
 
     @Bean
     public Job job() {
