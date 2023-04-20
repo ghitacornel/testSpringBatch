@@ -5,6 +5,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
 @Entity
@@ -19,5 +21,8 @@ public class InputEntity {
     private String lastName;
     private int salary;
     private int age;
+
+    @Enumerated(EnumType.STRING)
+    private InputStatus status = InputStatus.NEW;
 
 }
