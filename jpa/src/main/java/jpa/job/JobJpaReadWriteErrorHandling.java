@@ -169,8 +169,7 @@ public class JobJpaReadWriteErrorHandling {
 
                     // make sure exactly 1 item fails processing
                     if (input.getId().equals(1000)) {
-//                        throw new SpecificException();
-                        return null;
+                        throw new SpecificException();
                     }
 
                     input.setStatus(InputStatus.PROCESSED);
