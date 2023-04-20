@@ -76,7 +76,7 @@ public class JobJpaReadWriteErrorHandling {
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     inputEntities.addAll(InputGenerator.generate(count));
-//                    inputEntities.get(100).setId(-100);// this will fail validation
+                    inputEntities.get(100).setId(-100);// this will fail validation
 
                     // write generated data
                     inputEntityRepository.saveAll(inputEntities);
@@ -94,7 +94,7 @@ public class JobJpaReadWriteErrorHandling {
                     // check count
                     long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    count = count - 1;// exactly 2 fails validation
+                    count = count - 2;// exactly 2 fails validation
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
@@ -104,17 +104,17 @@ public class JobJpaReadWriteErrorHandling {
                         throw new RuntimeException("id 1000 still present");
                     });
 
-//                    // item with negative id is not persisted
-//                    outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
-//                        throw new RuntimeException("id -100 still present");
-//                    });
-//                    outputEntityRepository.findById(100).ifPresent(outputEntity -> {
-//                        throw new RuntimeException("id 100 still present");
-//                    });
+                    // item with negative id is not persisted
+                    outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
+                        throw new RuntimeException("id -100 still present");
+                    });
+                    outputEntityRepository.findById(100).ifPresent(outputEntity -> {
+                        throw new RuntimeException("id 100 still present");
+                    });
 
                     // check input data status
                     inputEntityRepository.findAll().forEach(inputEntity -> {
-                        if (inputEntity.getId().equals(1000)) {
+                        if (inputEntity.getId().equals(1000)||inputEntity.getId().equals(-100)) {
                             if (!InputStatus.NEW.equals(inputEntity.getStatus())) {
                                 throw new RuntimeException("status not NEW for " + inputEntity);
                             }
@@ -167,6 +167,10 @@ public class JobJpaReadWriteErrorHandling {
 
                     // make sure exactly 1 item fails processing
                     if (input.getId().equals(1000)) {
+                        throw new SpecificException();
+                    }
+
+                    if (input.getId() < 0) {
                         throw new SpecificException();
                     }
 
