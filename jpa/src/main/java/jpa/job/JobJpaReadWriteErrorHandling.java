@@ -24,6 +24,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Profile("main.jobs.jdbc.performance.JobJpaReadWriteErrorHandling")
 @Configuration
@@ -94,10 +95,23 @@ public class JobJpaReadWriteErrorHandling {
                     // check count
                     long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    count--;// exactly 1 fails validation
+                    count--;// exactly 2 fails validation
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
+
+                    // item that fails processing is not saved
+                    outputEntityRepository.findById(1000).ifPresent(outputEntity -> {
+                        throw new RuntimeException("id 1000 still present");
+                    });
+
+                    // item with negative id is not persisted
+                    outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
+                        throw new RuntimeException("id -100 still present");
+                    });
+                    outputEntityRepository.findById(100).ifPresent(outputEntity -> {
+                        throw new RuntimeException("id 100 still present");
+                    });
 
                     return RepeatStatus.FINISHED;
                 })
@@ -123,6 +137,7 @@ public class JobJpaReadWriteErrorHandling {
                 // larger is faster but requires more memory
                 .<InputEntity, OutputEntity>chunk(1000)
 
+                // skip on exception writing
                 .faultTolerant()
                 .skipPolicy((t, skipCount) -> t instanceof ConstraintViolationException)
 
@@ -131,6 +146,12 @@ public class JobJpaReadWriteErrorHandling {
 
                 // processor/TRANSFORM
                 .processor((ItemProcessor<InputEntity, OutputEntity>) input -> {
+
+                    // make sure exactly 1 item fails processing
+                    if (input.getId().equals(1000)) {
+                        throw new RuntimeException("fail processing for id 1000");
+                    }
+
                     OutputEntity output = new OutputEntity();
                     output.setId(input.getId());
                     output.setFirstName(input.getFirstName());
