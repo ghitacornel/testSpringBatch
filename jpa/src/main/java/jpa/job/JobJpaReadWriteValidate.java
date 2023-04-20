@@ -126,7 +126,6 @@ public class JobJpaReadWriteValidate {
         reader.setQueryString("select t from InputEntity t");
         reader.setEntityManagerFactory(h2EMFB);
         reader.setPageSize(1000);
-        reader.setSaveState(false);
 
         JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(hsqlEMFB);
