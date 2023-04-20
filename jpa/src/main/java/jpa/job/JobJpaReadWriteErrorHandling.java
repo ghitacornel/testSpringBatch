@@ -138,6 +138,8 @@ public class JobJpaReadWriteErrorHandling {
         ItemWriter<ProcessResult> writer = items -> {
             for (ProcessResult item : items) {
                 // really BAD idea to write back in the INPUT data source
+                // even worse in case of BATCH for every item
+                // BETTER validate before WRITING
                 inputEntityRepository.save(item.getInput());
                 outputEntityRepository.save(item.getOutput());
             }
