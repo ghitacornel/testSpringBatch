@@ -47,8 +47,6 @@ public class JobJpaReadWriteErrorHandling {
     @Autowired
     private EntityManagerFactory h2EMFB;
     @Autowired
-    private EntityManagerFactory hsqlEMFB;
-    @Autowired
     private PlatformTransactionManager chainTxManager;
 
     // used for checks
