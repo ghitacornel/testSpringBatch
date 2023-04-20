@@ -114,7 +114,7 @@ public class JobJpaReadWriteErrorHandling {
 
                     // check input data status
                     inputEntityRepository.findAll().forEach(inputEntity -> {
-                        if (inputEntity.getId().equals(1000)||inputEntity.getId().equals(-100)) {
+                        if (inputEntity.getId().equals(1000) || inputEntity.getId().equals(-100)) {
                             if (!InputStatus.NEW.equals(inputEntity.getStatus())) {
                                 throw new RuntimeException("status not NEW for " + inputEntity);
                             }
