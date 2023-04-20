@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jpa</artifactId>
+    <artifactId>jpa-2-databases</artifactId>
 
     <dependencies>
         <dependency>
