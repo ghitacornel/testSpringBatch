@@ -138,6 +138,7 @@ public class JobJpaReadWriteValidate {
 
         ItemWriter<ProcessResult> writer = items -> {
             for (ProcessResult item : items) {
+                // really BAD idea to write back in the INPUT data source
                 inputEntityRepository.save(item.getInput());
                 outputEntityRepository.save(item.getOutput());
             }
@@ -166,6 +167,7 @@ public class JobJpaReadWriteValidate {
                     output.setAge(input.getAge() + 1);
                     output.setSalary(input.getSalary() + 2);
                     output.setDifference(output.getSalary() - output.getAge());
+
                     return ProcessResult.builder()
                             .input(input)
                             .output(output)
