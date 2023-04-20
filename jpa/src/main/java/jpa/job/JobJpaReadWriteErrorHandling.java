@@ -4,6 +4,7 @@ import jpa.configuration.h2.entity.InputEntity;
 import jpa.configuration.h2.repository.InputEntityRepository;
 import jpa.configuration.hsql.entity.OutputEntity;
 import jpa.configuration.hsql.repository.OutputEntityRepository;
+import jpa.exception.SpecificException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -94,7 +95,7 @@ public class JobJpaReadWriteErrorHandling {
                     // check count
                     long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    count--;// exactly 2 fails validation
+                    count = count - 2;// exactly 2 fails validation
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
@@ -138,7 +139,11 @@ public class JobJpaReadWriteErrorHandling {
 
                 // skip on exception writing
                 .faultTolerant()
-                .skipPolicy((t, skipCount) -> t instanceof ConstraintViolationException)
+                .skipPolicy((t, skipCount) -> {
+                    if (t instanceof ConstraintViolationException) return true;
+                    if (t instanceof SpecificException) return true;
+                    return false;
+                })
 
                 // reader/EXTRACT
                 .reader(reader)
@@ -148,7 +153,7 @@ public class JobJpaReadWriteErrorHandling {
 
                     // make sure exactly 1 item fails processing
                     if (input.getId().equals(1000)) {
-                        throw new RuntimeException("fail processing for id 1000");
+                        throw new SpecificException();
                     }
 
                     OutputEntity output = new OutputEntity();
