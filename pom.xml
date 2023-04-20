@@ -17,7 +17,7 @@
         <module>csv-simple</module>
         <module>csv-parallel</module>
         <module>csv-performance</module>
-        <module>jdbc</module>
+        <module>jdbc-2-databases</module>
         <module>jpa</module>
     </modules>
 
