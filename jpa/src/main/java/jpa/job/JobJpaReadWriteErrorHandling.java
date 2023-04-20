@@ -1,6 +1,7 @@
 package jpa.job;
 
 import jpa.configuration.h2.entity.InputEntity;
+import jpa.configuration.h2.entity.InputStatus;
 import jpa.configuration.h2.repository.InputEntityRepository;
 import jpa.configuration.hsql.entity.OutputEntity;
 import jpa.configuration.hsql.repository.OutputEntityRepository;
@@ -11,6 +12,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -77,7 +79,7 @@ public class JobJpaReadWriteErrorHandling {
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     inputEntities.addAll(InputGenerator.generate(count));
-                    inputEntities.get(100).setId(-100);// this will fail validation
+//                    inputEntities.get(100).setId(-100);// this will fail validation
 
                     // write generated data
                     inputEntityRepository.saveAll(inputEntities);
@@ -95,7 +97,7 @@ public class JobJpaReadWriteErrorHandling {
                     // check count
                     long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    count = count - 2;// exactly 2 fails validation
+                    count = count - 1;// exactly 2 fails validation
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
@@ -105,12 +107,23 @@ public class JobJpaReadWriteErrorHandling {
                         throw new RuntimeException("id 1000 still present");
                     });
 
-                    // item with negative id is not persisted
-                    outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
-                        throw new RuntimeException("id -100 still present");
-                    });
-                    outputEntityRepository.findById(100).ifPresent(outputEntity -> {
-                        throw new RuntimeException("id 100 still present");
+//                    // item with negative id is not persisted
+//                    outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
+//                        throw new RuntimeException("id -100 still present");
+//                    });
+//                    outputEntityRepository.findById(100).ifPresent(outputEntity -> {
+//                        throw new RuntimeException("id 100 still present");
+//                    });
+
+                    // check input data status
+                    inputEntityRepository.findAll().forEach(inputEntity -> {
+                        if (inputEntity.getId().equals(1000)) {
+                            if (!InputStatus.NEW.equals(inputEntity.getStatus())) {
+                                throw new RuntimeException("status not NEW for " + inputEntity);
+                            }
+                        } else if (!InputStatus.PROCESSED.equals(inputEntity.getStatus())) {
+                            throw new RuntimeException("status not PROCESSED for " + inputEntity);
+                        }
                     });
 
                     return RepeatStatus.FINISHED;
@@ -125,9 +138,13 @@ public class JobJpaReadWriteErrorHandling {
         reader.setEntityManagerFactory(h2EMFB);
         reader.setPageSize(1000);
 
-        JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(hsqlEMFB);
-        writer.setUsePersist(true);
+        ItemWriter<ProcessResult> writer = items -> {
+            for (ProcessResult item : items) {
+                // really BAD idea to write back in the INPUT data source
+                inputEntityRepository.save(item.getInput());
+                outputEntityRepository.save(item.getOutput());
+            }
+        };
 
         return stepBuilderFactory.get("processingStep")
 
@@ -135,7 +152,7 @@ public class JobJpaReadWriteErrorHandling {
                 .transactionManager(chainTxManager)
 
                 // larger is faster but requires more memory
-                .<InputEntity, OutputEntity>chunk(1000)
+                .<InputEntity, ProcessResult>chunk(1000)
 
                 // skip on exception writing
                 .faultTolerant()
@@ -149,12 +166,15 @@ public class JobJpaReadWriteErrorHandling {
                 .reader(reader)
 
                 // processor/TRANSFORM
-                .processor((ItemProcessor<InputEntity, OutputEntity>) input -> {
+                .processor((ItemProcessor<InputEntity, ProcessResult>) input -> {
 
                     // make sure exactly 1 item fails processing
                     if (input.getId().equals(1000)) {
-                        throw new SpecificException();
+//                        throw new SpecificException();
+                        return null;
                     }
+
+                    input.setStatus(InputStatus.PROCESSED);
 
                     OutputEntity output = new OutputEntity();
                     output.setId(input.getId());
@@ -163,7 +183,11 @@ public class JobJpaReadWriteErrorHandling {
                     output.setAge(input.getAge() + 1);
                     output.setSalary(input.getSalary() + 2);
                     output.setDifference(output.getSalary() - output.getAge());
-                    return output;
+
+                    return ProcessResult.builder()
+                            .input(input)
+                            .output(output)
+                            .build();
                 })
 
                 // writer/LOAD
