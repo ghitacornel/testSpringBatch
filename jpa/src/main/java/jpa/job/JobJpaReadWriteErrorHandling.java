@@ -24,7 +24,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Profile("main.jobs.jdbc.performance.JobJpaReadWriteErrorHandling")
 @Configuration
