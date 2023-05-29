@@ -19,7 +19,7 @@ import java.util.Objects;
 public class JobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory steps;
+    private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job job(JobExecutionDecider jobExecutionDecider) {
@@ -34,7 +34,7 @@ public class JobConfiguration {
     }
 
     Step step1() {
-        return steps
+        return stepBuilderFactory
                 .get("step1")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step1", "step1");
@@ -51,7 +51,7 @@ public class JobConfiguration {
 
 
     Step step2() {
-        return steps
+        return stepBuilderFactory
                 .get("step2")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step2", "step2");
@@ -61,7 +61,7 @@ public class JobConfiguration {
     }
 
     Step step3() {
-        return steps
+        return stepBuilderFactory
                 .get("step3")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step3", "step3");
@@ -71,7 +71,7 @@ public class JobConfiguration {
     }
 
     Step step31() {
-        return steps
+        return stepBuilderFactory
                 .get("step31")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step31", "step31");
@@ -81,7 +81,7 @@ public class JobConfiguration {
     }
 
     Step step4() {
-        return steps
+        return stepBuilderFactory
                 .get("step4")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step4", "step4");
@@ -91,7 +91,7 @@ public class JobConfiguration {
     }
 
     Step step41() {
-        return steps
+        return stepBuilderFactory
                 .get("step41")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step41", "step41");
@@ -101,7 +101,7 @@ public class JobConfiguration {
     }
 
     Step step42() {
-        return steps
+        return stepBuilderFactory
                 .get("step42")
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step42", "step42");
