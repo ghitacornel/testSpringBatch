@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class JobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory steps;
+    private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job job(Step step1, Step step2, JobListener jobListener) {
@@ -28,7 +28,7 @@ public class JobConfiguration {
 
     @Bean
     Step step1(Tasklet1 tasklet, Step1Listener listener) {
-        return steps
+        return stepBuilderFactory
                 .get("step1")
                 .tasklet(tasklet)
                 .listener(listener)
@@ -37,7 +37,7 @@ public class JobConfiguration {
 
     @Bean
     Step step2(Tasklet2 tasklet, Step2Listener listener) {
-        return steps
+        return stepBuilderFactory
                 .get("step2")
                 .tasklet(tasklet)
                 .listener(listener)
