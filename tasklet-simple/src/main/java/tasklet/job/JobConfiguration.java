@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class JobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory steps;
+    private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job job(JobTaskletExecutionListener job1ExecutionListener, JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
@@ -28,7 +28,7 @@ public class JobConfiguration {
     }
 
     Step step1(JobTaskletStepExecutionListener jobTaskletStepExecutionListener) {
-        return steps
+        return stepBuilderFactory
                 .get("singleExecutionStep")
                 .tasklet((contribution, chunkContext) -> {
                     System.out.println("single execution step");
@@ -39,7 +39,7 @@ public class JobConfiguration {
     }
 
     Step step2() {
-        return steps
+        return stepBuilderFactory
                 .get("repeatableExecutionStep")
                 .tasklet((contribution, chunkContext) -> {
                     Integer attribute = (Integer) chunkContext.getAttribute("counts");
