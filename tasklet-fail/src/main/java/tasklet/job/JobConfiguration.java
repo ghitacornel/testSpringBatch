@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class JobConfiguration {
 
     private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory steps;
+    private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
     public Job job() {
@@ -25,7 +25,7 @@ public class JobConfiguration {
     }
 
     Step step() {
-        return steps
+        return stepBuilderFactory
                 .get("stepFail")
                 .tasklet((contribution, chunkContext) -> {
 
