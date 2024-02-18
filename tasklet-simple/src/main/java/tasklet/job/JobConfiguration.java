@@ -45,7 +45,9 @@ public class JobConfiguration {
         return new StepBuilder("repeatableExecutionStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     Integer attribute = (Integer) chunkContext.getAttribute("counts");
-                    if (attribute == null) attribute = 0;
+                    if (attribute == null) {
+                        attribute = 0;
+                    }
                     if (attribute < 3) {
                         attribute++;
                         chunkContext.setAttribute("counts", attribute);
