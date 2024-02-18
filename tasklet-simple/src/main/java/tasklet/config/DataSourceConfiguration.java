@@ -1,4 +1,4 @@
-package tasklet.common;
+package tasklet.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

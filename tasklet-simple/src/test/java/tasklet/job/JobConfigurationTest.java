@@ -11,10 +11,10 @@ import java.util.Iterator;
 public class JobConfigurationTest extends TestsConfiguration {
 
     @Autowired
-    JobTaskletExecutionListener jobExecutionListener;
+    CustomJobExecutionListener jobExecutionListener;
 
     @Autowired
-    JobTaskletStepExecutionListener stepExecutionListener;
+    CustomStepExecutionListener stepExecutionListener;
 
     @Autowired
     Job job;
