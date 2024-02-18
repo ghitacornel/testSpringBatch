@@ -16,11 +16,13 @@ public class JobConfigurationTest extends TestsConfiguration {
     @Autowired
     JobTaskletStepExecutionListener stepExecutionListener;
 
+    @Autowired
+    Job job;
+
     @Test
     public void testJob() throws Exception {
 
-        JobParameters jobParameters = defaultJobParameters();
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+        JobExecution jobExecution = jobLauncher.run(job, new JobParameters());
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
