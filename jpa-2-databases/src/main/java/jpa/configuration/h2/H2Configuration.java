@@ -19,7 +19,7 @@ import java.util.Map;
         basePackages = {"jpa.configuration.h2"}
 )
 @DependsOn({"flywayInitializer"})
-public class H2Configuration {
+class H2Configuration {
 
     @Bean
     LocalContainerEntityManagerFactoryBean h2EMFB(@Qualifier("dataSourceH2") DataSource dataSource, EntityManagerFactoryBuilder builder) {

@@ -17,6 +17,7 @@ public class InputEntity {
 
     @Id
     private Integer id;
+
     private String firstName;
     private String lastName;
     private int salary;

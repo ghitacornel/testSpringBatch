@@ -19,7 +19,7 @@ import java.util.Map;
         basePackages = {"jpa.configuration.hsql"}
 )
 @DependsOn({"flywayInitializer"})
-public class HSQLConfiguration {
+class HSQLConfiguration {
 
     @Bean
     LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("dataSourceHSQL") DataSource dataSource, EntityManagerFactoryBuilder builder) {
