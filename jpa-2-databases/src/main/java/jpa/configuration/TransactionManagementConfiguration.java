@@ -14,17 +14,17 @@ import jakarta.persistence.EntityManagerFactory;
 class TransactionManagementConfiguration {
 
     @Bean
-    JpaTransactionManager h2PTM(@Qualifier("h2EMFB") EntityManagerFactory entityManagerFactory) {
+    JpaTransactionManager h2JTM(@Qualifier("h2EMFB") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     @Bean
-    JpaTransactionManager hsqlPTM(@Qualifier("hsqlEMFB") EntityManagerFactory entityManagerFactory) {
+    JpaTransactionManager hsqlJTM(@Qualifier("hsqlEMFB") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     @Bean
-    PlatformTransactionManager platformTransactionManager(@Qualifier("h2PTM") JpaTransactionManager jpaTransactionManager1, @Qualifier("hsqlPTM") JpaTransactionManager jpaTransactionManager2) {
+    PlatformTransactionManager platformTransactionManager(@Qualifier("h2JTM") JpaTransactionManager jpaTransactionManager1, @Qualifier("hsqlJTM") JpaTransactionManager jpaTransactionManager2) {
         return new ChainedTransactionManager(jpaTransactionManager1, jpaTransactionManager2);
     }
 
