@@ -8,7 +8,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
@@ -125,7 +124,7 @@ class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
                 .reader(reader())
 
                 // processor/TRANSFORM
-                .processor((ItemProcessor<InputDTO, OutputDTO>) input -> {
+                .processor(input -> {
                     OutputDTO output = new OutputDTO();
                     output.setId(input.getId());
                     output.setFirstName(input.getFirstName());
