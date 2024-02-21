@@ -9,6 +9,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jobscope-simple</artifactId>
+    <artifactId>job-scope-simple</artifactId>
 
 </project>
