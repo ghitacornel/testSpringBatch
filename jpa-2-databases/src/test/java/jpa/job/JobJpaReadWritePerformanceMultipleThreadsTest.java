@@ -5,16 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
 class JobJpaReadWritePerformanceMultipleThreadsTest {
 
     @Autowired
     JobLauncher jobLauncher;
 
+    @Qualifier("jobJpaReadWritePerformanceMultipleThreads")
     @Autowired
     Job job;
 
@@ -31,7 +31,7 @@ class JobJpaReadWritePerformanceMultipleThreadsTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), JobJpaReadWritePerformanceMultipleThreads.JOB_NAME);
+        Assertions.assertEquals(jobInstance.getJobName(), "jobJpaReadWritePerformanceMultipleThreads");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }

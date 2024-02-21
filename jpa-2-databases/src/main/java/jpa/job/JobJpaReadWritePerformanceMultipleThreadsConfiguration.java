@@ -18,18 +18,14 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
-@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
 @Configuration
 @RequiredArgsConstructor
-class JobJpaReadWritePerformanceMultipleThreads {
-
-    static final String JOB_NAME = JobJpaReadWritePerformanceMultipleThreads.class.getName();
+class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
 
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
@@ -43,8 +39,8 @@ class JobJpaReadWritePerformanceMultipleThreads {
     private final EntityManagerFactory hsqlEMFB;
 
     @Bean
-    Job job() {
-        return new JobBuilder(JobJpaReadWritePerformanceMultipleThreads.class.getName(), jobRepository)
+    Job jobJpaReadWritePerformanceMultipleThreads() {
+        return new JobBuilder("jobJpaReadWritePerformanceMultipleThreads", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())

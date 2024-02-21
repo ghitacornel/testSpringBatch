@@ -1,11 +1,11 @@
 package jpa.job;
 
+import jakarta.persistence.EntityManagerFactory;
 import jpa.configuration.h2.entity.InputEntity;
 import jpa.configuration.h2.entity.InputStatus;
 import jpa.configuration.h2.repository.InputEntityRepository;
 import jpa.configuration.hsql.entity.OutputEntity;
 import jpa.configuration.hsql.repository.OutputEntityRepository;
-import jpa.exception.SpecificException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -19,22 +19,18 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.validation.ConstraintViolationException;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-@Profile("main.jobs.jdbc.performance.JobJpaReadWriteErrorHandling")
 @Configuration
 @RequiredArgsConstructor
-class JobJpaReadWriteErrorHandling {
-
-    static final String JOB_NAME = JobJpaReadWriteErrorHandling.class.getName();
+class JobJpaReadWriteValidateConfiguration {
 
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
@@ -48,8 +44,8 @@ class JobJpaReadWriteErrorHandling {
     private final List<InputEntity> inputEntities = new ArrayList<>();
 
     @Bean
-    Job job() {
-        return new JobBuilder(JOB_NAME, jobRepository)
+    Job jobJpaReadWriteValidate() {
+        return new JobBuilder("jobJpaReadWriteValidate", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -70,7 +66,6 @@ class JobJpaReadWriteErrorHandling {
                     // generate data
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
                     inputEntities.addAll(InputGenerator.generate(count));
-                    inputEntities.get(100).setId(-100);// this will fail validation
 
                     // write generated data
                     inputEntityRepository.saveAll(inputEntities);
@@ -87,32 +82,31 @@ class JobJpaReadWriteErrorHandling {
                     // check count
                     long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    count = count - 2;// exactly 2 fails validation
                     if (actualCount != count) {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
 
-                    // item that fails processing is not saved
-                    outputEntityRepository.findById(1000).ifPresent(outputEntity -> {
-                        throw new RuntimeException("id 1000 still present");
-                    });
-
-                    // item with negative id is not persisted
-                    outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
-                        throw new RuntimeException("id -100 still present");
-                    });
-                    outputEntityRepository.findById(100).ifPresent(outputEntity -> {
-                        throw new RuntimeException("id 100 still present");
+                    // check data
+                    List<OutputEntity> outputEntities = outputEntityRepository.findAll();
+                    Map<Integer, InputEntity> map = inputEntities.stream().collect(Collectors.toMap(InputEntity::getId, Function.identity()));
+                    outputEntities.forEach(outputEntity -> {
+                        InputEntity inputEntity = map.get(outputEntity.getId());
+                        if (inputEntity == null) {
+                            throw new RuntimeException("missing input id" + outputEntity.getId());
+                        }
+                        if (!outputEntity.getFirstName().equals(inputEntity.getFirstName()) ||
+                                !outputEntity.getLastName().equals(inputEntity.getLastName()) ||
+                                outputEntity.getAge() != inputEntity.getAge() + 1 ||
+                                outputEntity.getSalary() != inputEntity.getSalary() + 2 ||
+                                outputEntity.getDifference() != outputEntity.getSalary() - outputEntity.getAge()) {
+                            throw new RuntimeException("mismatch " + outputEntity + " with " + inputEntity);
+                        }
                     });
 
                     // check input data status
                     inputEntityRepository.findAll().forEach(inputEntity -> {
-                        if (inputEntity.getId().equals(1000) || inputEntity.getId().equals(-100)) {
-                            if (!InputStatus.NEW.equals(inputEntity.getStatus())) {
-                                throw new RuntimeException("status not NEW for " + inputEntity);
-                            }
-                        } else if (!InputStatus.PROCESSED.equals(inputEntity.getStatus())) {
-                            throw new RuntimeException("status not PROCESSED for " + inputEntity);
+                        if (!InputStatus.PROCESSED.equals(inputEntity.getStatus())) {
+                            throw new RuntimeException("status not processed for " + inputEntity);
                         }
                     });
 
@@ -131,8 +125,6 @@ class JobJpaReadWriteErrorHandling {
         ItemWriter<ProcessResult> writer = items -> {
             for (ProcessResult item : items) {
                 // really BAD idea to write back in the INPUT data source
-                // even worse in case of BATCH for every item
-                // BETTER validate before WRITING
                 inputEntityRepository.save(item.getInput());
                 outputEntityRepository.save(item.getOutput());
             }
@@ -143,28 +135,11 @@ class JobJpaReadWriteErrorHandling {
                 // larger is faster but requires more memory
                 .<InputEntity, ProcessResult>chunk(1000, transactionManager)
 
-                // skip on exception writing
-                .faultTolerant()
-                .skipPolicy((t, skipCount) -> {
-                    if (t instanceof ConstraintViolationException) return true;
-                    if (t instanceof SpecificException) return true;
-                    return false;
-                })
-
                 // reader/EXTRACT
                 .reader(reader)
 
                 // processor/TRANSFORM
                 .processor(input -> {
-
-                    // make sure exactly 1 item fails processing
-                    if (input.getId().equals(1000)) {
-                        throw new SpecificException();
-                    }
-
-                    if (input.getId() < 0) {
-                        throw new SpecificException();
-                    }
 
                     input.setStatus(InputStatus.PROCESSED);
 

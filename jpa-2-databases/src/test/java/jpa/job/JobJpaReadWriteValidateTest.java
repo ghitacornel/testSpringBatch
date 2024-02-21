@@ -5,16 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("main.jobs.jdbc.performance.JobJpaReadWriteValidate")
 class JobJpaReadWriteValidateTest {
 
     @Autowired
     JobLauncher jobLauncher;
 
+    @Qualifier("jobJpaReadWriteValidate")
     @Autowired
     Job job;
 
@@ -31,7 +31,7 @@ class JobJpaReadWriteValidateTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), JobJpaReadWriteValidate.JOB_NAME);
+        Assertions.assertEquals(jobInstance.getJobName(), "jobJpaReadWriteValidate");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }
