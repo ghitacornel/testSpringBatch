@@ -15,13 +15,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class JobConfiguration {
+class JobConfiguration {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job(CustomJobExecutionListener jobExecutionListener, CustomStepExecutionListener stepExecutionListener) {
+    Job job(CustomJobExecutionListener jobExecutionListener, CustomStepExecutionListener stepExecutionListener) {
         return new JobBuilder("main.jobs.tasklet.JobConfiguration", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(new StepBuilder("singleExecutionStep", jobRepository)

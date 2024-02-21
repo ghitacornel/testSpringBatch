@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 @Configuration
-public class DataSourceConfiguration {
+class DataSourceConfiguration {
 
     @Bean
-    public DataSource dataSource() {
+    DataSource dataSource() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.apache.derby.iapi.jdbc.AutoloadedDriver");
         config.setJdbcUrl("jdbc:derby:memory:demo;create=true");

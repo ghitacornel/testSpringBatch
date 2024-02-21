@@ -1,54 +1,44 @@
 package jpa.job;
 
+import jakarta.persistence.EntityManagerFactory;
 import jpa.configuration.h2.entity.InputEntity;
 import jpa.configuration.h2.repository.InputEntityRepository;
 import jpa.configuration.hsql.entity.OutputEntity;
 import jpa.configuration.hsql.repository.OutputEntityRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
 
 @Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
 @Configuration
-public class JobJpaReadWritePerformanceSingleThread {
+@RequiredArgsConstructor
+class JobJpaReadWritePerformanceSingleThread {
 
     static final String JOB_NAME = JobJpaReadWritePerformanceSingleThread.class.getName();
 
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
-    private InputEntityRepository inputEntityRepository;
-    @Autowired
-    private OutputEntityRepository outputEntityRepository;
-
-    @Autowired
-    private EntityManagerFactory h2EMFB;
-    @Autowired
-    private EntityManagerFactory hsqlEMFB;
-    @Autowired
-    private PlatformTransactionManager chainTxManager;
+    private final JobRepository jobRepository;
+    private final InputEntityRepository inputEntityRepository;
+    private final OutputEntityRepository outputEntityRepository;
+    private final EntityManagerFactory h2EMFB;
+    private final EntityManagerFactory hsqlEMFB;
+    private final PlatformTransactionManager chainTxManager;
 
     @Bean
-    public Job job() {
-        return jobBuilderFactory.get(JOB_NAME)
+    Job job() {
+        return new JobBuilder(JOB_NAME, jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -57,8 +47,7 @@ public class JobJpaReadWritePerformanceSingleThread {
     }
 
     private Step createDataStep() {
-        return stepBuilderFactory
-                .get("createDataStep")
+        return new StepBuilder("createDataStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
@@ -75,13 +64,12 @@ public class JobJpaReadWritePerformanceSingleThread {
                     inputEntityRepository.saveAll(list);
 
                     return RepeatStatus.FINISHED;
-                })
+                }, chainTxManager)
                 .build();
     }
 
     private Step verifyDatabaseStep() {// only a count is performed as validation
-        return stepBuilderFactory
-                .get("verifyDatabaseStep")
+        return new StepBuilder("verifyDatabaseStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     long actualCount = outputEntityRepository.count();
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -89,7 +77,7 @@ public class JobJpaReadWritePerformanceSingleThread {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
                     return RepeatStatus.FINISHED;
-                })
+                }, chainTxManager)
                 .build();
     }
 
@@ -105,19 +93,16 @@ public class JobJpaReadWritePerformanceSingleThread {
         writer.setEntityManagerFactory(hsqlEMFB);
         writer.setUsePersist(true);
 
-        return stepBuilderFactory.get("processingStep")
-
-                // distributed transaction management since we are using 2 different databases
-                .transactionManager(chainTxManager)
+        return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputEntity, OutputEntity>chunk(1000)
+                .<InputEntity, OutputEntity>chunk(1000, chainTxManager)
 
                 // reader/EXTRACT
                 .reader(reader)
 
                 // processor/TRANSFORM
-                .processor((ItemProcessor<InputEntity, OutputEntity>) input -> {
+                .processor(input -> {
                     OutputEntity output = new OutputEntity();
                     output.setId(input.getId());
                     output.setFirstName(input.getFirstName());

@@ -6,16 +6,16 @@ import jpa.configuration.h2.repository.InputEntityRepository;
 import jpa.configuration.hsql.entity.OutputEntity;
 import jpa.configuration.hsql.repository.OutputEntityRepository;
 import jpa.exception.SpecificException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -24,37 +24,29 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Profile("main.jobs.jdbc.performance.JobJpaReadWriteErrorHandling")
 @Configuration
-public class JobJpaReadWriteErrorHandling {
+@RequiredArgsConstructor
+class JobJpaReadWriteErrorHandling {
 
     static final String JOB_NAME = JobJpaReadWriteErrorHandling.class.getName();
 
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
-    private InputEntityRepository inputEntityRepository;
-    @Autowired
-    private OutputEntityRepository outputEntityRepository;
-
-    @Autowired
-    private EntityManagerFactory h2EMFB;
-    @Autowired
-    private PlatformTransactionManager chainTxManager;
+    private final JobRepository jobRepository;
+    private final InputEntityRepository inputEntityRepository;
+    private final OutputEntityRepository outputEntityRepository;
+    private final EntityManagerFactory h2EMFB;
+    private final PlatformTransactionManager chainTxManager;
 
     // used for checks
     private final List<InputEntity> inputEntities = new ArrayList<>();
 
     @Bean
-    public Job job() {
-        return jobBuilderFactory.get(JOB_NAME)
+    Job job() {
+        return new JobBuilder(JOB_NAME, jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -63,8 +55,7 @@ public class JobJpaReadWriteErrorHandling {
     }
 
     private Step createDataStep() {
-        return stepBuilderFactory
-                .get("createDataStep")
+        return new StepBuilder("createDataStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
@@ -82,13 +73,12 @@ public class JobJpaReadWriteErrorHandling {
                     inputEntityRepository.saveAll(inputEntities);
 
                     return RepeatStatus.FINISHED;
-                })
+                }, chainTxManager)
                 .build();
     }
 
     private Step verifyDatabaseStep() {
-        return stepBuilderFactory
-                .get("verifyDatabaseStep")
+        return new StepBuilder("verifyDatabaseStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
                     // check count
@@ -124,7 +114,7 @@ public class JobJpaReadWriteErrorHandling {
                     });
 
                     return RepeatStatus.FINISHED;
-                })
+                }, chainTxManager)
                 .build();
     }
 
@@ -145,13 +135,10 @@ public class JobJpaReadWriteErrorHandling {
             }
         };
 
-        return stepBuilderFactory.get("processingStep")
-
-                // distributed transaction management since we are using 2 different databases
-                .transactionManager(chainTxManager)
+        return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputEntity, ProcessResult>chunk(1000)
+                .<InputEntity, ProcessResult>chunk(1000, chainTxManager)
 
                 // skip on exception writing
                 .faultTolerant()
@@ -165,7 +152,7 @@ public class JobJpaReadWriteErrorHandling {
                 .reader(reader)
 
                 // processor/TRANSFORM
-                .processor((ItemProcessor<InputEntity, ProcessResult>) input -> {
+                .processor(input -> {
 
                     // make sure exactly 1 item fails processing
                     if (input.getId().equals(1000)) {
@@ -197,7 +184,6 @@ public class JobJpaReadWriteErrorHandling {
 
                 // executor for parallel running
                 .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
-                .throttleLimit(5)
 
                 //job configuration done
                 .build();

@@ -13,20 +13,20 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-public class JobConfiguration {
+class JobConfiguration {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job() {
+    Job job() {
         return new JobBuilder("main.jobs.tasklet.fails.JobConfiguration", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(step())
                 .build();
     }
 
-    Step step() {
+    private Step step() {
         return new StepBuilder("stepFail", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
