@@ -3,12 +3,17 @@ package tasklet.job;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
-import tasklet.job.common.TestsConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Iterator;
 
-public class JobConfigurationTest extends TestsConfiguration {
+@SpringBootTest
+class JobConfigurationTest {
+
+    @Autowired
+    JobLauncher jobLauncher;
 
     @Autowired
     CustomJobExecutionListener jobExecutionListener;
@@ -20,7 +25,7 @@ public class JobConfigurationTest extends TestsConfiguration {
     Job job;
 
     @Test
-    public void testJob() throws Exception {
+    void testJob() throws Exception {
 
         JobExecution jobExecution = jobLauncher.run(job, new JobParameters());
 

@@ -3,17 +3,25 @@ package tasklet.job;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
-import tasklet.job.common.TestsConfiguration;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Iterator;
 
-public class JobConfigurationTest extends TestsConfiguration {
+@SpringBootTest
+class JobConfigurationTest {
+
+    @Autowired
+    JobLauncher jobLauncher;
+
+    @Autowired
+    Job job;
 
     @Test
-    public void testJob() throws Exception {
+    void testJob() throws Exception {
 
-        JobParameters jobParameters = defaultJobParameters();
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+        JobExecution jobExecution = jobLauncher.run(job, new JobParameters());
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
@@ -24,7 +32,7 @@ public class JobConfigurationTest extends TestsConfiguration {
         Assertions.assertEquals(jobExecution.getFailureExceptions().size(), 0);
 
         Assertions.assertEquals(jobExecution.getAllFailureExceptions().size(), 1);
-        Assertions.assertEquals(jobExecution.getAllFailureExceptions().get(0).getMessage(), "step that must fail");
+        Assertions.assertEquals(jobExecution.getAllFailureExceptions().getFirst().getMessage(), "step that must fail");
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
