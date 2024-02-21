@@ -39,7 +39,6 @@ class JobJpaReadWriteValidate {
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
     private final EntityManagerFactory h2EMFB;
-    private final EntityManagerFactory hsqlEMFB;
     private final PlatformTransactionManager chainTxManager;
 
     // used for checks
