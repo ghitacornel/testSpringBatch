@@ -71,4 +71,5 @@ class JobConfigurationTest {
         Assertions.assertTrue(stepExecutionListener.afterExecuted);
 
     }
+
 }

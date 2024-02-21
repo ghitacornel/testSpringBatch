@@ -3,27 +3,29 @@ package decider.job;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.FlowExecutionStatus;
 import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Objects;
 
 @Configuration
 @RequiredArgsConstructor
-public class JobConfiguration {
+class JobConfiguration {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job(JobExecutionDecider jobExecutionDecider) {
-        return jobBuilderFactory.get("main.jobs.decider.JobConfiguration")
+    Job job(JobExecutionDecider jobExecutionDecider) {
+        return new JobBuilder("main.jobs.decider.JobConfiguration", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .next(jobExecutionDecider).on("2").to(step2())
@@ -33,13 +35,12 @@ public class JobConfiguration {
                 .build();
     }
 
-    Step step1() {
-        return stepBuilderFactory
-                .get("step1")
+    private Step step1() {
+        return new StepBuilder("step1", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step1", "step1");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
@@ -49,64 +50,57 @@ public class JobConfiguration {
         return (jobExecution, stepExecution) -> new FlowExecutionStatus(Objects.requireNonNull(jobExecution.getJobParameters().getString("path")));
     }
 
-
-    Step step2() {
-        return stepBuilderFactory
-                .get("step2")
+    private Step step2() {
+        return new StepBuilder("step2", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step2", "step2");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
-    Step step3() {
-        return stepBuilderFactory
-                .get("step3")
+    private Step step3() {
+        return new StepBuilder("step3", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step3", "step3");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
-    Step step31() {
-        return stepBuilderFactory
-                .get("step31")
+    private Step step31() {
+        return new StepBuilder("step31", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step31", "step31");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
-    Step step4() {
-        return stepBuilderFactory
-                .get("step4")
+    private Step step4() {
+        return new StepBuilder("step4", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step4", "step4");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
-    Step step41() {
-        return stepBuilderFactory
-                .get("step41")
+    private Step step41() {
+        return new StepBuilder("step41", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step41", "step41");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
-    Step step42() {
-        return stepBuilderFactory
-                .get("step42")
+    private Step step42() {
+        return new StepBuilder("step42", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().putString("step42", "step42");
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
