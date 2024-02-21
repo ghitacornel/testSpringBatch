@@ -15,6 +15,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -32,9 +33,13 @@ class JobJpaReadWritePerformanceSingleThread {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
-    private final EntityManagerFactory h2EMFB;
-    private final EntityManagerFactory hsqlEMFB;
     private final PlatformTransactionManager transactionManager;
+
+    @Qualifier("h2EMFB")
+    private final EntityManagerFactory h2EMFB;
+
+    @Qualifier("hsqlEMFB")
+    private final EntityManagerFactory hsqlEMFB;
 
     @Bean
     Job job() {

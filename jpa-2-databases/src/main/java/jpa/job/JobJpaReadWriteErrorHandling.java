@@ -16,6 +16,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -38,8 +39,10 @@ class JobJpaReadWriteErrorHandling {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
-    private final EntityManagerFactory h2EMFB;
     private final PlatformTransactionManager transactionManager;
+
+    @Qualifier("h2EMFB")
+    private final EntityManagerFactory h2EMFB;
 
     // used for checks
     private final List<InputEntity> inputEntities = new ArrayList<>();
