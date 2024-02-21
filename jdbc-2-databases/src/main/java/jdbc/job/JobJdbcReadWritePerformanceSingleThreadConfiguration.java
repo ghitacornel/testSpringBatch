@@ -1,52 +1,44 @@
 package jdbc.job;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
-@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
 @Configuration
-public class JobJdbcReadWritePerformanceSingleThread {
+@RequiredArgsConstructor
+class JobJdbcReadWritePerformanceSingleThreadConfiguration {
 
-    static final String JOB_NAME = JobJdbcReadWritePerformanceSingleThread.class.getName();
-
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
     @Qualifier("dataSourceH2")
-    private DataSource dataSourceH2;
+    private final DataSource dataSourceH2;
 
-    @Autowired
     @Qualifier("dataSourceHSQL")
-    private DataSource dataSourceHSQL;
+    private final DataSource dataSourceHSQL;
+
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job() {
-        return jobBuilderFactory.get(JOB_NAME)
+    Job jobJdbcReadWritePerformanceSingleThread() {
+        return new JobBuilder("jobJdbcReadWritePerformanceSingleThread", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -55,8 +47,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
     }
 
     private Step createDataStep() {
-        return stepBuilderFactory
-                .get("createDataStep")
+        return new StepBuilder("createDataStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
@@ -94,13 +85,12 @@ public class JobJdbcReadWritePerformanceSingleThread {
                     connection.close();
 
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
     private Step verifyDatabaseStep() {// only a count is performed as validation
-        return stepBuilderFactory
-                .get("verifyDatabaseStep")
+        return new StepBuilder("verifyDatabaseStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
@@ -114,15 +104,15 @@ public class JobJdbcReadWritePerformanceSingleThread {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
     private Step processingStep() {
-        return stepBuilderFactory.get("processingStep")
+        return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputDTO, OutputDTO>chunk(1000)
+                .<InputDTO, OutputDTO>chunk(1000, transactionManager)
 
                 // reader/EXTRACT
                 .reader(new JdbcCursorItemReaderBuilder<InputDTO>()
@@ -133,7 +123,7 @@ public class JobJdbcReadWritePerformanceSingleThread {
                         .build())
 
                 // processor/TRANSFORM
-                .processor((ItemProcessor<InputDTO, OutputDTO>) input -> {
+                .processor(input -> {
                     OutputDTO output = new OutputDTO();
                     output.setId(input.getId());
                     output.setFirstName(input.getFirstName());

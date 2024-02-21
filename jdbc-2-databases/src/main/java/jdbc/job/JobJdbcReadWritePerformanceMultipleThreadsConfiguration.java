@@ -1,10 +1,13 @@
 package jdbc.job;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
@@ -12,44 +15,38 @@ import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilde
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.H2PagingQueryProvider;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
-@Profile("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceMultipleThreads")
+@Slf4j
 @Configuration
-public class JobJdbcReadWritePerformanceMultipleThreads {
+@RequiredArgsConstructor
+class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
 
-    static final String JOB_NAME = JobJdbcReadWritePerformanceMultipleThreads.class.getName();
-
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
-
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
-
-    @Autowired
     @Qualifier("dataSourceH2")
-    private DataSource dataSourceH2;
+    private final DataSource dataSourceH2;
 
-    @Autowired
     @Qualifier("dataSourceHSQL")
-    private DataSource dataSourceHSQL;
+    private final DataSource dataSourceHSQL;
+
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job() {
-        return jobBuilderFactory.get(JobJdbcReadWritePerformanceMultipleThreads.class.getName())
+    Job jobJdbcReadWritePerformanceMultipleThreads() {
+        return new JobBuilder("jobJdbcReadWritePerformanceMultipleThreads", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())
@@ -58,8 +55,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
     }
 
     private Step createDataStep() {
-        return stepBuilderFactory
-                .get("createDataStep")
+        return new StepBuilder("createDataStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
 
                     //cleanup INPUT database
@@ -97,13 +93,12 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                     connection.close();
 
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
     private Step verifyDatabaseStep() {// only a count is performed as validation
-        return stepBuilderFactory
-                .get("verifyDatabaseStep")
+        return new StepBuilder("verifyDatabaseStep", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     Connection connection = dataSourceHSQL.getConnection();
                     PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from OutputDTO");
@@ -117,15 +112,15 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
     private Step processingStep() {
-        return stepBuilderFactory.get("processingStep")
+        return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputDTO, OutputDTO>chunk(1000)
+                .<InputDTO, OutputDTO>chunk(1000, transactionManager)
 
                 .reader(reader())
 
@@ -157,7 +152,6 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
 
                 // executor for parallel running
                 .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
-                .throttleLimit(5)
 
                 //job configuration done
                 .build();
@@ -186,7 +180,7 @@ public class JobJdbcReadWritePerformanceMultipleThreads {
         try {
             jdbcPagingItemReader.afterPropertiesSet();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("reader error", e);
         }
 
         return jdbcPagingItemReader;
