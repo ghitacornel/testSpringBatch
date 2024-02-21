@@ -62,12 +62,6 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!-- FLYWAY -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-
         <!-- CONFIGURED DATABASE FOR SPRING BATCH -->
         <dependency>
             <groupId>org.hsqldb</groupId>
