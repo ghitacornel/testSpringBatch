@@ -47,7 +47,11 @@ class JobConfiguration {
     }
 
     @Bean
-    Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
+    Step step(
+            ItemReader<InputData> reader,
+            ItemProcessor<InputData, OutputData> processor,
+            ItemWriter<OutputData> writer
+    ) {
         return new StepBuilder("main.jobs.csv.JobConfiguration.step", jobRepository)
                 .<InputData, OutputData>chunk(100, transactionManager)// larger is faster but requires more memory
                 .reader(reader)
