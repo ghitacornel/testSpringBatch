@@ -15,7 +15,6 @@ import java.util.Map;
 @Configuration
 @EnableJpaRepositories(
         entityManagerFactoryRef = "h2EMFB",
-        transactionManagerRef = "h2PTM",
         basePackages = {"jpa.configuration.h2"}
 )
 @DependsOn({"flywayInitializer"})

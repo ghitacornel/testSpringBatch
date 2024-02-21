@@ -24,7 +24,7 @@ class TransactionManagementConfiguration {
     }
 
     @Bean
-    PlatformTransactionManager platformTransactionManager(@Qualifier("h2JTM") JpaTransactionManager jpaTransactionManager1, @Qualifier("hsqlJTM") JpaTransactionManager jpaTransactionManager2) {
+    PlatformTransactionManager transactionManager(@Qualifier("h2JTM") JpaTransactionManager jpaTransactionManager1, @Qualifier("hsqlJTM") JpaTransactionManager jpaTransactionManager2) {
         return new ChainedTransactionManager(jpaTransactionManager1, jpaTransactionManager2);
     }
 

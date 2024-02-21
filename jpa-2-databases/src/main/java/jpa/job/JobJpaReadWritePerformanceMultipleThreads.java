@@ -35,7 +35,7 @@ class JobJpaReadWritePerformanceMultipleThreads {
     private final OutputEntityRepository outputEntityRepository;
     private final EntityManagerFactory h2EMFB;
     private final EntityManagerFactory hsqlEMFB;
-    private final PlatformTransactionManager platformTransactionManager;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
     Job job() {
@@ -65,7 +65,7 @@ class JobJpaReadWritePerformanceMultipleThreads {
                     inputEntityRepository.saveAll(list);
 
                     return RepeatStatus.FINISHED;
-                }, platformTransactionManager)
+                }, transactionManager)
                 .build();
     }
 
@@ -78,7 +78,7 @@ class JobJpaReadWritePerformanceMultipleThreads {
                         throw new RuntimeException("expected " + count + " found " + actualCount);
                     }
                     return RepeatStatus.FINISHED;
-                }, platformTransactionManager)
+                }, transactionManager)
                 .build();
     }
 
@@ -97,7 +97,7 @@ class JobJpaReadWritePerformanceMultipleThreads {
         return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputEntity, OutputEntity>chunk(1000, platformTransactionManager)
+                .<InputEntity, OutputEntity>chunk(1000, transactionManager)
 
                 .reader(reader)
 

@@ -39,7 +39,7 @@ class JobJpaReadWriteErrorHandling {
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
     private final EntityManagerFactory h2EMFB;
-    private final PlatformTransactionManager platformTransactionManager;
+    private final PlatformTransactionManager transactionManager;
 
     // used for checks
     private final List<InputEntity> inputEntities = new ArrayList<>();
@@ -73,7 +73,7 @@ class JobJpaReadWriteErrorHandling {
                     inputEntityRepository.saveAll(inputEntities);
 
                     return RepeatStatus.FINISHED;
-                }, platformTransactionManager)
+                }, transactionManager)
                 .build();
     }
 
@@ -114,7 +114,7 @@ class JobJpaReadWriteErrorHandling {
                     });
 
                     return RepeatStatus.FINISHED;
-                }, platformTransactionManager)
+                }, transactionManager)
                 .build();
     }
 
@@ -138,7 +138,7 @@ class JobJpaReadWriteErrorHandling {
         return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputEntity, ProcessResult>chunk(1000, platformTransactionManager)
+                .<InputEntity, ProcessResult>chunk(1000, transactionManager)
 
                 // skip on exception writing
                 .faultTolerant()

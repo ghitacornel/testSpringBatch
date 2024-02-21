@@ -15,7 +15,6 @@ import java.util.Map;
 @Configuration
 @EnableJpaRepositories(
         entityManagerFactoryRef = "hsqlEMFB",
-        transactionManagerRef = "hsqlPTM",
         basePackages = {"jpa.configuration.hsql"}
 )
 @DependsOn({"flywayInitializer"})
