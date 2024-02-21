@@ -3,10 +3,11 @@ package csv.job;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -21,43 +22,45 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
+
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 @Configuration
 @RequiredArgsConstructor
-public class JobConfiguration {
+class JobConfiguration {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job(Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.parallel.JobConfiguration")
+    Job job(Step step) {
+        return new JobBuilder("main.jobs.csv.parallel.JobConfiguration", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
     }
 
     @Bean
-    public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.parallel.JobConfiguration.step")
-                .<InputData, OutputData>chunk(10)// larger is faster but requires more memory
+    Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
+        return new StepBuilder("main.jobs.csv.parallel.JobConfiguration.step", jobRepository)
+                .<InputData, OutputData>chunk(10, transactionManager)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
                 .taskExecutor(taskExecutor())
-                .throttleLimit(10)
                 .build();
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<InputData, OutputData> processor(Validator validator) {
+    ItemProcessor<InputData, OutputData> processor(Validator validator) {
         return input -> {
             {
                 Set<ConstraintViolation<InputData>> violations = validator.validate(input);
@@ -79,7 +82,7 @@ public class JobConfiguration {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+    FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLinesToSkip(1);// skip header
@@ -102,7 +105,7 @@ public class JobConfiguration {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+    FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
 
@@ -125,6 +128,6 @@ public class JobConfiguration {
     }
 
     private TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor("parallelTaskExecutor");
+        return new ConcurrentTaskExecutor(Executors.newFixedThreadPool(10));
     }
 }
