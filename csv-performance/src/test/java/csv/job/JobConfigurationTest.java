@@ -1,21 +1,30 @@
 package csv.job;
 
-import csv.job.common.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.nio.file.Path;
 
-public class JobConfigurationTest extends TestsConfiguration {
+@SpringBootTest
+class JobConfigurationTest {
+
+    @Autowired
+    JobLauncher jobLauncher;
+
+    @Autowired
+    Job job;
 
     @TempDir
     Path workingFolder;
 
     @Test
-    public void testJob() throws Exception {
+    void testJob() throws Exception {
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("timestamp", System.currentTimeMillis())
@@ -24,7 +33,7 @@ public class JobConfigurationTest extends TestsConfiguration {
                 .addString("outputPath", workingFolder.toString() + File.separator + "output.csv")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();

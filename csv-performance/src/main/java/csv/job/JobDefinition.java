@@ -3,10 +3,11 @@ package csv.job;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -23,24 +24,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 @Configuration
 @RequiredArgsConstructor
-public class JobDefinition {
+class JobDefinition {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job(@Qualifier("step") Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.performance.JobDefinition")
+    Job job(@Qualifier("step") Step step) {
+        return new JobBuilder("main.jobs.csv.performance.JobDefinition", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createData())
                 .next(step)
@@ -49,8 +52,7 @@ public class JobDefinition {
     }
 
     private Step createData() {
-        return stepBuilderFactory
-                .get("main.jobs.csv.performance.JobDefinition.createData")
+        return new StepBuilder("main.jobs.csv.performance.JobDefinition.createData", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("inputPath");
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -62,13 +64,12 @@ public class JobDefinition {
                     file.flush();
                     file.close();
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
     private Step verifyFile() {
-        return stepBuilderFactory
-                .get("main.jobs.csv.performance.JobDefinition.verifyFile")
+        return new StepBuilder("main.jobs.csv.performance.JobDefinition.verifyFile", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("outputPath");
                     long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -77,25 +78,24 @@ public class JobDefinition {
                         throw new RuntimeException("expected " + count + " found " + allLines.size());
                     }
                     return RepeatStatus.FINISHED;
-                })
+                }, transactionManager)
                 .build();
     }
 
     @Bean
-    public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.performance.JobDefinition.step")
-                .<InputData, OutputData>chunk(1000)// larger is faster but requires more memory
+    Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
+        return new StepBuilder("main.jobs.csv.performance.JobDefinition.step", jobRepository)
+                .<InputData, OutputData>chunk(1000, transactionManager)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
                 .taskExecutor(taskExecutor())
-                .throttleLimit(5)
                 .build();
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<InputData, OutputData> processor() {
+    ItemProcessor<InputData, OutputData> processor() {
         return input -> {
             OutputData output = new OutputData();
             output.setId(input.getId());
@@ -110,7 +110,7 @@ public class JobDefinition {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+    FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLineMapper(new DefaultLineMapper<>() {
@@ -132,7 +132,7 @@ public class JobDefinition {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+    FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
         writer.setAppendAllowed(false);
@@ -149,7 +149,7 @@ public class JobDefinition {
     }
 
     private TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor("performanceTaskExecutor");
+        return new ConcurrentTaskExecutor(Executors.newFixedThreadPool(10));
     }
 
 }
