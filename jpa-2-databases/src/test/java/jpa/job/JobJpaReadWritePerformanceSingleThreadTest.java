@@ -1,23 +1,32 @@
 package jpa.job;
 
-import jpa.job.jdbc.common.TestsConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+@SpringBootTest
 @ActiveProfiles("main.jobs.jdbc.performance.JobJdbcReadWritePerformanceSingleThread")
-public class JobJpaReadWritePerformanceSingleThreadTest extends TestsConfiguration {
+class JobJpaReadWritePerformanceSingleThreadTest {
+
+    @Autowired
+    JobLauncher jobLauncher;
+
+    @Autowired
+    Job job;
 
     @Test
-    public void testJob() throws Exception {
+    void testJob() throws Exception {
 
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("timestamp", System.currentTimeMillis())
                 .addLong("count", 100000L)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
