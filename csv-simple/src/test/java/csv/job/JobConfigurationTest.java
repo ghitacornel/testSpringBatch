@@ -1,13 +1,14 @@
 package csv.job;
 
-import csv.job.common.TestsConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
-import org.springframework.batch.test.AssertFile;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +18,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 
-public class JobConfigurationTest extends TestsConfiguration {
+@SpringBootTest
+public class JobConfigurationTest {
+
+    @Autowired
+    JobLauncher jobLauncher;
+
+    @Autowired
+    Job job;
 
     @TempDir
     Path workingFolder;
@@ -30,10 +38,10 @@ public class JobConfigurationTest extends TestsConfiguration {
     }
 
     @AfterEach
-    public void checkFile() throws Exception {
+    public void checkFile() {
         Path input = Paths.get("src", "test", "resources", "output.csv");
         Path output = Paths.get(workingFolder.toString(), "output.csv");
-        AssertFile.assertFileEquals(input.toFile(), output.toFile());
+        org.assertj.core.api.Assertions.assertThat(input.toFile()).hasSameTextualContentAs(output.toFile());
     }
 
     @Test
@@ -45,7 +53,7 @@ public class JobConfigurationTest extends TestsConfiguration {
                 .addString("outputPath", workingFolder.toString() + File.separator + "output.csv")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
+        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();

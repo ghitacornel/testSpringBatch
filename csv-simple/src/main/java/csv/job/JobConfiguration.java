@@ -1,12 +1,14 @@
 package csv.job;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -24,27 +26,30 @@ import org.springframework.core.io.FileSystemResource;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.springframework.transaction.PlatformTransactionManager;
+
 import java.util.Set;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class JobConfiguration {
+class JobConfiguration {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job job(Step step) {
-        return jobBuilderFactory.get("main.jobs.csv.JobConfiguration")
+    Job job(Step step) {
+        return new JobBuilder("main.jobs.csv.JobConfiguration", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(step)
                 .build();
     }
 
     @Bean
-    public Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
-        return stepBuilderFactory.get("main.jobs.csv.JobConfiguration.step")
-                .<InputData, OutputData>chunk(100)// larger is faster but requires more memory
+    Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
+        return new StepBuilder("main.jobs.csv.JobConfiguration.step", jobRepository)
+                .<InputData, OutputData>chunk(100, transactionManager)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
@@ -52,12 +57,12 @@ public class JobConfiguration {
     }
 
     @Bean
-    public ItemProcessor<InputData, OutputData> processor(Validator validator) {
+    ItemProcessor<InputData, OutputData> processor(Validator validator) {
         return input -> {
             {
                 Set<ConstraintViolation<InputData>> violations = validator.validate(input);
                 if (!violations.isEmpty()) {
-                    System.err.println(violations);
+                    log.error(violations.toString());
                     return null;
                 }
             }
@@ -74,7 +79,7 @@ public class JobConfiguration {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+    FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
         FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(inputPath));
         reader.setLinesToSkip(1);// skip header
@@ -97,7 +102,7 @@ public class JobConfiguration {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+    FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
         FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(outputPath));
 
