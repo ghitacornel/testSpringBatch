@@ -39,7 +39,7 @@ class JobJpaReadWriteValidate {
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
     private final EntityManagerFactory h2EMFB;
-    private final PlatformTransactionManager chainTxManager;
+    private final PlatformTransactionManager platformTransactionManager;
 
     // used for checks
     private final List<InputEntity> inputEntities = new ArrayList<>();
@@ -72,7 +72,7 @@ class JobJpaReadWriteValidate {
                     inputEntityRepository.saveAll(inputEntities);
 
                     return RepeatStatus.FINISHED;
-                }, chainTxManager)
+                }, platformTransactionManager)
                 .build();
     }
 
@@ -112,7 +112,7 @@ class JobJpaReadWriteValidate {
                     });
 
                     return RepeatStatus.FINISHED;
-                }, chainTxManager)
+                }, platformTransactionManager)
                 .build();
     }
 
@@ -134,7 +134,7 @@ class JobJpaReadWriteValidate {
         return new StepBuilder("processingStep", jobRepository)
 
                 // larger is faster but requires more memory
-                .<InputEntity, ProcessResult>chunk(1000, chainTxManager)
+                .<InputEntity, ProcessResult>chunk(1000, platformTransactionManager)
 
                 // reader/EXTRACT
                 .reader(reader)
