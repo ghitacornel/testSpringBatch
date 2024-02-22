@@ -53,8 +53,6 @@ class JobSingleThreadConfiguration {
                         }, transactionManager)
                         .build())
                 .next(new StepBuilder("migrateData", jobRepository)
-
-                        // larger is faster but requires more memory
                         .<InputEntity, OutputEntity>chunk(1000, transactionManager)
                         .reader(new RepositoryItemReaderBuilder<InputEntity>()
                                 .name("inputEntityReader")
