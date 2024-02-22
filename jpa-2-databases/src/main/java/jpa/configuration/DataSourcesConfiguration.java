@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Primary;
 import javax.sql.DataSource;
 
 @Configuration
-class DataSourceConfiguration {
+class DataSourcesConfiguration {
 
     // the default data source to be used by Spring Batch
     // Spring batch always needs at least 1 data source
