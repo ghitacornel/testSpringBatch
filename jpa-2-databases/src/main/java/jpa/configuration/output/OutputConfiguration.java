@@ -21,7 +21,7 @@ import java.util.Map;
 class OutputConfiguration {
 
     @Bean
-    LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("dataSourceHSQL") DataSource dataSource, EntityManagerFactoryBuilder builder) {
+    LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("outputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");

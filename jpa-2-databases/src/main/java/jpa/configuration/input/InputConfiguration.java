@@ -21,7 +21,7 @@ import java.util.Map;
 class InputConfiguration {
 
     @Bean
-    LocalContainerEntityManagerFactoryBean h2EMFB(@Qualifier("dataSourceH2") DataSource dataSource, EntityManagerFactoryBuilder builder) {
+    LocalContainerEntityManagerFactoryBean h2EMFB(@Qualifier("inputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");

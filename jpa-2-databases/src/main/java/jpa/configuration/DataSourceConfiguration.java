@@ -23,18 +23,18 @@ class DataSourceConfiguration {
     }
 
     @Bean
-    DataSource dataSourceH2() {
+    DataSource inputDataSource() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.h2.Driver");
-        config.setJdbcUrl("jdbc:h2:mem:test");
+        config.setJdbcUrl("jdbc:h2:mem:inputDB");
         return new HikariDataSource(config);
     }
 
     @Bean
-    DataSource dataSourceHSQL() {
+    DataSource outputDataSource() {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.hsqldb.jdbcDriver");
-        config.setJdbcUrl("jdbc:hsqldb:mem:testdb");
+        config.setJdbcUrl("jdbc:hsqldb:mem:outputDB");
         return new HikariDataSource(config);
     }
 
