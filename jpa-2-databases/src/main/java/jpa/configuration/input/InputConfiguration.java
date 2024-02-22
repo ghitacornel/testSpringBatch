@@ -1,4 +1,4 @@
-package jpa.configuration.h2;
+package jpa.configuration.input;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -15,10 +15,10 @@ import java.util.Map;
 @Configuration
 @EnableJpaRepositories(
         entityManagerFactoryRef = "h2EMFB",
-        basePackages = {"jpa.configuration.h2"}
+        basePackages = {"jpa.configuration.input"}
 )
 @DependsOn({"flywayInitializer"})
-class H2Configuration {
+class InputConfiguration {
 
     @Bean
     LocalContainerEntityManagerFactoryBean h2EMFB(@Qualifier("dataSourceH2") DataSource dataSource, EntityManagerFactoryBuilder builder) {
@@ -29,7 +29,7 @@ class H2Configuration {
         map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         return builder
                 .dataSource(dataSource)
-                .packages("jpa.configuration.h2.entity")
+                .packages("jpa.configuration.input.entity")
                 .persistenceUnit("h2")
                 .properties(map)
                 .build();

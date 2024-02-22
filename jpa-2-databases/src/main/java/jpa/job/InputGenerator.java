@@ -1,7 +1,7 @@
 package jpa.job;
 
 import com.github.javafaker.Faker;
-import jpa.configuration.h2.entity.InputEntity;
+import jpa.configuration.input.entity.InputEntity;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;

@@ -1,10 +1,10 @@
 package jpa.job;
 
 import jakarta.persistence.EntityManagerFactory;
-import jpa.configuration.h2.entity.InputEntity;
-import jpa.configuration.h2.repository.InputEntityRepository;
-import jpa.configuration.hsql.entity.OutputEntity;
-import jpa.configuration.hsql.repository.OutputEntityRepository;
+import jpa.configuration.input.entity.InputEntity;
+import jpa.configuration.input.repository.InputEntityRepository;
+import jpa.configuration.output.entity.OutputEntity;
+import jpa.configuration.output.repository.OutputEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

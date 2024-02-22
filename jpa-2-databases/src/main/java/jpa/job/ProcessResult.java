@@ -1,7 +1,7 @@
 package jpa.job;
 
-import jpa.configuration.h2.entity.InputEntity;
-import jpa.configuration.hsql.entity.OutputEntity;
+import jpa.configuration.input.entity.InputEntity;
+import jpa.configuration.output.entity.OutputEntity;
 import lombok.Builder;
 import lombok.Data;
 

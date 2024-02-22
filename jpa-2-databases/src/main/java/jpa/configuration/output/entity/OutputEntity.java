@@ -1,4 +1,4 @@
-package jpa.configuration.hsql.entity;
+package jpa.configuration.output.entity;
 
 import lombok.*;
 

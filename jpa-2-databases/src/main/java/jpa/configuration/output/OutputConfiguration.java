@@ -1,4 +1,4 @@
-package jpa.configuration.hsql;
+package jpa.configuration.output;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -15,10 +15,10 @@ import java.util.Map;
 @Configuration
 @EnableJpaRepositories(
         entityManagerFactoryRef = "hsqlEMFB",
-        basePackages = {"jpa.configuration.hsql"}
+        basePackages = {"jpa.configuration.output"}
 )
 @DependsOn({"flywayInitializer"})
-class HSQLConfiguration {
+class OutputConfiguration {
 
     @Bean
     LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("dataSourceHSQL") DataSource dataSource, EntityManagerFactoryBuilder builder) {
@@ -29,7 +29,7 @@ class HSQLConfiguration {
         map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         return builder
                 .dataSource(dataSource)
-                .packages("jpa.configuration.hsql.entity")
+                .packages("jpa.configuration.output.entity")
                 .persistenceUnit("hsql")
                 .properties(map)
                 .build();

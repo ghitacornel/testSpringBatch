@@ -2,11 +2,11 @@ package jpa.job;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.validation.ConstraintViolationException;
-import jpa.configuration.h2.entity.InputEntity;
-import jpa.configuration.h2.entity.InputStatus;
-import jpa.configuration.h2.repository.InputEntityRepository;
-import jpa.configuration.hsql.entity.OutputEntity;
-import jpa.configuration.hsql.repository.OutputEntityRepository;
+import jpa.configuration.input.entity.InputEntity;
+import jpa.configuration.input.entity.InputStatus;
+import jpa.configuration.input.repository.InputEntityRepository;
+import jpa.configuration.output.entity.OutputEntity;
+import jpa.configuration.output.repository.OutputEntityRepository;
 import jpa.exception.SpecificException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;

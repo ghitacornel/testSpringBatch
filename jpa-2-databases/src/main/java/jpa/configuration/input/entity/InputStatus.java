@@ -1,4 +1,4 @@
-package jpa.configuration.h2.entity;
+package jpa.configuration.input.entity;
 
 public enum InputStatus {
 
