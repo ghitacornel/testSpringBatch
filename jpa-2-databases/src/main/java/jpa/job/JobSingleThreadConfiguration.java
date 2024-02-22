@@ -78,16 +78,14 @@ class JobSingleThreadConfiguration {
                         .reader(reader)
 
                         // processor/TRANSFORM
-                        .processor(input -> {
-                            OutputEntity output = new OutputEntity();
-                            output.setId(input.getId());
-                            output.setFirstName(input.getFirstName());
-                            output.setLastName(input.getLastName());
-                            output.setAge(input.getAge() + 1);
-                            output.setSalary(input.getSalary() + 2);
-                            output.setDifference(output.getSalary() - output.getAge());
-                            return output;
-                        })
+                        .processor(input -> OutputEntity.builder()
+                                .id(input.getId())
+                                .firstName(input.getFirstName())
+                                .lastName(input.getLastName())
+                                .age(input.getAge() + 1)
+                                .salary(input.getSalary() + 2)
+                                .difference(input.getSalary() - input.getAge())
+                                .build())
 
                         // writer/LOAD
                         .writer(writer)

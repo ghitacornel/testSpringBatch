@@ -1,8 +1,6 @@
 package jpa.configuration.hsql.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,6 +10,9 @@ import jakarta.validation.constraints.Min;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OutputEntity {
 
     @Id
