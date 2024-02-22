@@ -24,7 +24,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-class JobJpaReadWritePerformanceSingleThreadConfiguration {
+class JobSingleThreadConfiguration {
 
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
@@ -38,8 +38,8 @@ class JobJpaReadWritePerformanceSingleThreadConfiguration {
     private final EntityManagerFactory hsqlEMFB;
 
     @Bean
-    Job jobJpaReadWritePerformanceSingleThread() {
-        return new JobBuilder("jobJpaReadWritePerformanceSingleThread", jobRepository)
+    Job jobSingleThread() {
+        return new JobBuilder("jobSingleThread", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createDataStep())
                 .next(processingStep())

@@ -14,7 +14,7 @@ class JobJpaReadWritePerformanceSingleThreadTest {
     @Autowired
     JobLauncher jobLauncher;
 
-    @Qualifier("jobJpaReadWritePerformanceSingleThread")
+    @Qualifier("jobSingleThread")
     @Autowired
     Job job;
 
@@ -31,7 +31,7 @@ class JobJpaReadWritePerformanceSingleThreadTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "jobJpaReadWritePerformanceSingleThread");
+        Assertions.assertEquals(jobInstance.getJobName(), "jobSingleThread");
         Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
 
     }
