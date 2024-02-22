@@ -1,6 +1,5 @@
 package jpa.job;
 
-import jakarta.persistence.EntityManagerFactory;
 import jpa.configuration.input.entity.InputEntity;
 import jpa.configuration.input.repository.InputEntityRepository;
 import jpa.configuration.output.entity.OutputEntity;
@@ -11,14 +10,15 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.database.JpaItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -30,25 +30,8 @@ class JobSingleThreadConfiguration {
     private final OutputEntityRepository outputEntityRepository;
     private final PlatformTransactionManager transactionManager;
 
-    @Qualifier("h2EMFB")
-    private final EntityManagerFactory h2EMFB;
-
-    @Qualifier("hsqlEMFB")
-    private final EntityManagerFactory hsqlEMFB;
-
     @Bean
     Job jobSingleThread() {
-        // only a count is performed as validation
-
-        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
-        reader.setQueryString("select t from InputEntity t");
-        reader.setEntityManagerFactory(h2EMFB);
-        reader.setPageSize(1000);
-        reader.setSaveState(false);
-
-        JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(hsqlEMFB);
-        writer.setUsePersist(true);
 
         return new JobBuilder("jobSingleThread", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -73,11 +56,13 @@ class JobSingleThreadConfiguration {
 
                         // larger is faster but requires more memory
                         .<InputEntity, OutputEntity>chunk(1000, transactionManager)
-
-                        // reader/EXTRACT
-                        .reader(reader)
-
-                        // processor/TRANSFORM
+                        .reader(new RepositoryItemReaderBuilder<InputEntity>()
+                                .name("inputEntityReader")
+                                .repository(inputEntityRepository)
+                                .sorts(Collections.singletonMap("id", Sort.Direction.ASC))
+                                .methodName("findAll")
+                                .pageSize(100)
+                                .build())
                         .processor(input -> OutputEntity.builder()
                                 .id(input.getId())
                                 .firstName(input.getFirstName())
@@ -86,11 +71,9 @@ class JobSingleThreadConfiguration {
                                 .salary(input.getSalary() + 2)
                                 .difference(input.getSalary() - input.getAge())
                                 .build())
-
-                        // writer/LOAD
-                        .writer(writer)
-
-                        //job configuration done
+                        .writer(new RepositoryItemWriterBuilder<OutputEntity>()
+                                .repository(outputEntityRepository)
+                                .build())
                         .build())
                 .next(new StepBuilder("verifyMigratedData", jobRepository)
                         .tasklet((contribution1, chunkContext1) -> {
