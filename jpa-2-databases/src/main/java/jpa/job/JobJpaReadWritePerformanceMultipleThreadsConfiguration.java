@@ -32,11 +32,11 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
     private final OutputEntityRepository outputEntityRepository;
     private final PlatformTransactionManager transactionManager;
 
-    @Qualifier("h2EMFB")
-    private final EntityManagerFactory h2EMFB;
+    @Qualifier("inputEntityManager")
+    private final EntityManagerFactory inputEntityManager;
 
-    @Qualifier("hsqlEMFB")
-    private final EntityManagerFactory hsqlEMFB;
+    @Qualifier("outputEntityManager")
+    private final EntityManagerFactory outputEntityManager;
 
     @Bean
     Job jobJpaReadWritePerformanceMultipleThreads() {
@@ -87,12 +87,12 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
 
         JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
         reader.setQueryString("select t from InputEntity t order by id");
-        reader.setEntityManagerFactory(h2EMFB);
+        reader.setEntityManagerFactory(inputEntityManager);
         reader.setPageSize(1000);
         reader.setSaveState(false);
 
         JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(hsqlEMFB);
+        writer.setEntityManagerFactory(outputEntityManager);
         writer.setUsePersist(true);
 
         return new StepBuilder("processingStep", jobRepository)

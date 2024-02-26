@@ -37,8 +37,8 @@ class JobJpaReadWriteValidateConfiguration {
     private final OutputEntityRepository outputEntityRepository;
     private final PlatformTransactionManager transactionManager;
 
-    @Qualifier("h2EMFB")
-    private final EntityManagerFactory h2EMFB;
+    @Qualifier("inputEntityManager")
+    private final EntityManagerFactory inputEntityManager;
 
     // used for checks
     private final List<InputEntity> inputEntities = new ArrayList<>();
@@ -119,7 +119,7 @@ class JobJpaReadWriteValidateConfiguration {
 
         JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
         reader.setQueryString("select t from InputEntity t");
-        reader.setEntityManagerFactory(h2EMFB);
+        reader.setEntityManagerFactory(inputEntityManager);
         reader.setPageSize(1000);
 
         ItemWriter<ProcessResult> writer = items -> {

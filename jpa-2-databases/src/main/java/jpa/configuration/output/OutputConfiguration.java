@@ -14,14 +14,14 @@ import java.util.Map;
 
 @Configuration
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "hsqlEMFB",
+        entityManagerFactoryRef = "outputEntityManager",
         basePackages = {"jpa.configuration.output"}
 )
 @DependsOn({"flywayInitializer"})
 class OutputConfiguration {
 
     @Bean
-    LocalContainerEntityManagerFactoryBean hsqlEMFB(@Qualifier("outputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
+    LocalContainerEntityManagerFactoryBean outputEntityManager(@Qualifier("outputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
@@ -30,7 +30,7 @@ class OutputConfiguration {
         return builder
                 .dataSource(dataSource)
                 .packages("jpa.configuration.output.entity")
-                .persistenceUnit("hsql")
+                .persistenceUnit("outputPU")
                 .properties(map)
                 .build();
     }

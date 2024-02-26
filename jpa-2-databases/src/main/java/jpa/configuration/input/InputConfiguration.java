@@ -14,14 +14,14 @@ import java.util.Map;
 
 @Configuration
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "h2EMFB",
+        entityManagerFactoryRef = "inputEntityManager",
         basePackages = {"jpa.configuration.input"}
 )
 @DependsOn({"flywayInitializer"})
 class InputConfiguration {
 
     @Bean
-    LocalContainerEntityManagerFactoryBean h2EMFB(@Qualifier("inputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
+    LocalContainerEntityManagerFactoryBean inputEntityManager(@Qualifier("inputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
@@ -30,7 +30,7 @@ class InputConfiguration {
         return builder
                 .dataSource(dataSource)
                 .packages("jpa.configuration.input.entity")
-                .persistenceUnit("h2")
+                .persistenceUnit("inputPU")
                 .properties(map)
                 .build();
     }
