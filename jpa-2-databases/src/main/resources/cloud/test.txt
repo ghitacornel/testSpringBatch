@@ -1,0 +1,5 @@
+set DATAFLOW_VERSION=2.11.2
+set SKIPPER_VERSION=2.11.2
+docker-compose -f docker-compose.yml -f docker-compose-rabbitmq.yml -f docker-compose-postgres.yml up
+
+check => http://localhost:9393/dashboard/index.html#/apps
