@@ -1,6 +1,7 @@
 package jpa.configuration.input;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +21,15 @@ import java.util.Map;
 @DependsOn({"flywayInitializer"})
 class InputConfiguration {
 
+    @Value("${spring.datasource.input.database.action}")
+    private String action;
+
     @Bean
     LocalContainerEntityManagerFactoryBean inputEntityManager(@Qualifier("inputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
-        map.put("javax.persistence.schema-generation.database.action", "validate");
+        map.put("javax.persistence.schema-generation.database.action", action);
         return builder
                 .dataSource(dataSource)
                 .packages("jpa.configuration.input.entity")

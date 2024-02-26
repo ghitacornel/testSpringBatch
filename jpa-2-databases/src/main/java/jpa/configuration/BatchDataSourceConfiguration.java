@@ -37,7 +37,9 @@ class BatchDataSourceConfiguration {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driver);
-        config.setSchema(schema);
+        if(!schema.isBlank()) {
+            config.setSchema(schema);
+        }
         return new HikariDataSource(config);
     }
 
