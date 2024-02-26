@@ -112,9 +112,9 @@ class JobJpaReadWriteValidateConfiguration {
 
                             // check count
                             long actualCount = outputEntityRepository.count();
-                            long count1 = (long) chunkContext1.getStepContext().getJobParameters().get("count");
-                            if (actualCount != count1) {
-                                throw new RuntimeException("expected " + count1 + " found " + actualCount);
+                            long count = (long) chunkContext1.getStepContext().getJobParameters().get("count");
+                            if (actualCount != count) {
+                                throw new RuntimeException("expected " + count + " found " + actualCount);
                             }
 
                             // check data
