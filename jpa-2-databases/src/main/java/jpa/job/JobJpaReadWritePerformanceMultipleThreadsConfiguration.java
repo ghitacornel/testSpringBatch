@@ -53,14 +53,15 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
 
         return new JobBuilder("jobJpaReadWritePerformanceMultipleThreads", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(new StepBuilder("createDataStep", jobRepository)
+                .start(new StepBuilder("clean databases", jobRepository)
                         .tasklet((contribution, chunkContext) -> {
-
-                            //cleanup INPUT database
                             inputEntityRepository.deleteAll();
-
-                            //cleanup OUTPUT database
                             outputEntityRepository.deleteAll();
+                            return RepeatStatus.FINISHED;
+                        }, transactionManager)
+                        .build())
+                .next(new StepBuilder("generate dummy data", jobRepository)
+                        .tasklet((contribution, chunkContext) -> {
 
                             // generate data
                             long count = (long) chunkContext.getStepContext().getJobParameters().get("count");

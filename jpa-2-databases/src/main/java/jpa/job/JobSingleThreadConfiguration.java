@@ -35,12 +35,15 @@ class JobSingleThreadConfiguration {
 
         return new JobBuilder("jobSingleThread", jobRepository)
                 .incrementer(new RunIdIncrementer())
-                .start(new StepBuilder("createDummyData", jobRepository)
+                .start(new StepBuilder("clean databases", jobRepository)
                         .tasklet((contribution, chunkContext) -> {
-
-                            //cleanup databases
                             inputEntityRepository.deleteAll();
                             outputEntityRepository.deleteAll();
+                            return RepeatStatus.FINISHED;
+                        }, transactionManager)
+                        .build())
+                .next(new StepBuilder("generate dummy data", jobRepository)
+                        .tasklet((contribution, chunkContext) -> {
 
                             // generate data
                             long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
