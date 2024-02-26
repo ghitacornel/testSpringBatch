@@ -26,7 +26,7 @@ class OutputConfiguration {
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
         map.put("javax.persistence.schema-generation.database.action", "validate");
-        map.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+        map.put("hibernate.default_schema", "output");
         return builder
                 .dataSource(dataSource)
                 .packages("jpa.configuration.output.entity")

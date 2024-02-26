@@ -26,7 +26,7 @@ class InputConfiguration {
         map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
         map.put("javax.persistence.schema-generation.database.action", "validate");
-        map.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+        map.put("hibernate.default_schema", "input");
         return builder
                 .dataSource(dataSource)
                 .packages("jpa.configuration.input.entity")

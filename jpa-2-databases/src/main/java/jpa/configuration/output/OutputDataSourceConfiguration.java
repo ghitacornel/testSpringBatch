@@ -30,6 +30,7 @@ class OutputDataSourceConfiguration {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driver);
+        config.setSchema("output");
         return new HikariDataSource(config);
     }
 

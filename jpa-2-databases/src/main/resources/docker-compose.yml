@@ -3,33 +3,31 @@ version: '3.8'
 services:
 
   batch:
-    image: mysql:latest
+    image: postgres:latest
     container_name: batch
     ports:
-      - "3307:3306"
+      - "5433:5432"
     environment:
-      - MYSQL_USER=cornel
-      - MYSQL_PASSWORD=sefusefu
-      - MYSQL_ROOT_PASSWORD=sefusefu
-      - MYSQL_DATABASE=batch_database
+      - POSTGRES_USER=cornel
+      - POSTGRES_PASSWORD=sefusefu
+      - POSTGRES_DB=batch
 
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_USER=cornel
-      - MYSQL_PASSWORD=sefusefu
-      - MYSQL_ROOT_PASSWORD=sefusefu
-      - MYSQL_DATABASE=mysql_database
-
-  postgres:
+  input:
     image: postgres:latest
-    container_name: postgresql
+    container_name: input
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=cornel
+      - POSTGRES_PASSWORD=sefusefu
+      - POSTGRES_DB=input
+
+  output:
+    image: postgres:latest
+    container_name: output
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=cornel
       - POSTGRES_PASSWORD=sefusefu
-      - POSTGRES_DB=postgresql_database
+      - POSTGRES_DB=output
