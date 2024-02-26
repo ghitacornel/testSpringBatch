@@ -8,7 +8,6 @@ import jpa.configuration.output.entity.OutputEntity;
 import jpa.configuration.output.repository.OutputEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -45,77 +44,6 @@ class JobJpaReadWriteValidateConfiguration {
 
     @Bean
     Job jobJpaReadWriteValidate() {
-        return new JobBuilder("jobJpaReadWriteValidate", jobRepository)
-                .incrementer(new RunIdIncrementer())
-                .start(createDataStep())
-                .next(processingStep())
-                .next(verifyDatabaseStep())
-                .build();
-    }
-
-    private Step createDataStep() {
-        return new StepBuilder("createDataStep", jobRepository)
-                .tasklet((contribution, chunkContext) -> {
-
-                    //cleanup INPUT database
-                    inputEntityRepository.deleteAll();
-
-                    //cleanup OUTPUT database
-                    outputEntityRepository.deleteAll();
-
-                    // generate data
-                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    inputEntities.addAll(InputGenerator.generate(count));
-
-                    // write generated data
-                    inputEntityRepository.saveAll(inputEntities);
-
-                    return RepeatStatus.FINISHED;
-                }, transactionManager)
-                .build();
-    }
-
-    private Step verifyDatabaseStep() {
-        return new StepBuilder("verifyDatabaseStep", jobRepository)
-                .tasklet((contribution, chunkContext) -> {
-
-                    // check count
-                    long actualCount = outputEntityRepository.count();
-                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
-                    if (actualCount != count) {
-                        throw new RuntimeException("expected " + count + " found " + actualCount);
-                    }
-
-                    // check data
-                    List<OutputEntity> outputEntities = outputEntityRepository.findAll();
-                    Map<Integer, InputEntity> map = inputEntities.stream().collect(Collectors.toMap(InputEntity::getId, Function.identity()));
-                    outputEntities.forEach(outputEntity -> {
-                        InputEntity inputEntity = map.get(outputEntity.getId());
-                        if (inputEntity == null) {
-                            throw new RuntimeException("missing input id" + outputEntity.getId());
-                        }
-                        if (!outputEntity.getFirstName().equals(inputEntity.getFirstName()) ||
-                                !outputEntity.getLastName().equals(inputEntity.getLastName()) ||
-                                outputEntity.getAge() != inputEntity.getAge() + 1 ||
-                                outputEntity.getSalary() != inputEntity.getSalary() + 2 ||
-                                outputEntity.getDifference() != outputEntity.getSalary() - outputEntity.getAge()) {
-                            throw new RuntimeException("mismatch " + outputEntity + " with " + inputEntity);
-                        }
-                    });
-
-                    // check input data status
-                    inputEntityRepository.findAll().forEach(inputEntity -> {
-                        if (!InputStatus.PROCESSED.equals(inputEntity.getStatus())) {
-                            throw new RuntimeException("status not processed for " + inputEntity);
-                        }
-                    });
-
-                    return RepeatStatus.FINISHED;
-                }, transactionManager)
-                .build();
-    }
-
-    private Step processingStep() {
 
         JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
         reader.setQueryString("select t from InputEntity t");
@@ -130,40 +58,95 @@ class JobJpaReadWriteValidateConfiguration {
             }
         };
 
-        return new StepBuilder("processingStep", jobRepository)
+        return new JobBuilder("jobJpaReadWriteValidate", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .start(new StepBuilder("createDataStep", jobRepository)
+                        .tasklet((contribution, chunkContext) -> {
 
-                // larger is faster but requires more memory
-                .<InputEntity, ProcessResult>chunk(1000, transactionManager)
+                            //cleanup INPUT database
+                            inputEntityRepository.deleteAll();
 
-                // reader/EXTRACT
-                .reader(reader)
+                            //cleanup OUTPUT database
+                            outputEntityRepository.deleteAll();
 
-                // processor/TRANSFORM
-                .processor(input -> {
+                            // generate data
+                            long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
+                            inputEntities.addAll(InputGenerator.generate(count));
 
-                    input.setStatus(InputStatus.PROCESSED);
+                            // write generated data
+                            inputEntityRepository.saveAll(inputEntities);
 
-                    OutputEntity output = new OutputEntity();
-                    output.setId(input.getId());
-                    output.setFirstName(input.getFirstName());
-                    output.setLastName(input.getLastName());
-                    output.setAge(input.getAge() + 1);
-                    output.setSalary(input.getSalary() + 2);
-                    output.setDifference(output.getSalary() - output.getAge());
+                            return RepeatStatus.FINISHED;
+                        }, transactionManager)
+                        .build())
+                .next(new StepBuilder("processingStep", jobRepository)
 
-                    return ProcessResult.builder()
-                            .input(input)
-                            .output(output)
-                            .build();
-                })
+                        // larger is faster but requires more memory
+                        .<InputEntity, ProcessResult>chunk(1000, transactionManager)
 
-                // writer/LOAD
-                .writer(writer)
+                        // reader/EXTRACT
+                        .reader(reader)
 
-                // executor for parallel running
-                .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
+                        // processor/TRANSFORM
+                        .processor(input -> {
 
-                //job configuration done
+                            input.setStatus(InputStatus.PROCESSED);
+
+                            OutputEntity output = new OutputEntity();
+                            output.setId(input.getId());
+                            output.setFirstName(input.getFirstName());
+                            output.setLastName(input.getLastName());
+                            output.setAge(input.getAge() + 1);
+                            output.setSalary(input.getSalary() + 2);
+                            output.setDifference(output.getSalary() - output.getAge());
+
+                            return ProcessResult.builder()
+                                    .input(input)
+                                    .output(output)
+                                    .build();
+                        })
+
+                        // writer/LOAD
+                        .writer(writer)
+                        .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
+                        .build())
+                .next(new StepBuilder("verifyDatabaseStep", jobRepository)
+                        .tasklet((contribution1, chunkContext1) -> {
+
+                            // check count
+                            long actualCount = outputEntityRepository.count();
+                            long count1 = (long) chunkContext1.getStepContext().getJobParameters().get("count");
+                            if (actualCount != count1) {
+                                throw new RuntimeException("expected " + count1 + " found " + actualCount);
+                            }
+
+                            // check data
+                            List<OutputEntity> outputEntities = outputEntityRepository.findAll();
+                            Map<Integer, InputEntity> map = inputEntities.stream().collect(Collectors.toMap(InputEntity::getId, Function.identity()));
+                            outputEntities.forEach(outputEntity -> {
+                                InputEntity inputEntity = map.get(outputEntity.getId());
+                                if (inputEntity == null) {
+                                    throw new RuntimeException("missing input id" + outputEntity.getId());
+                                }
+                                if (!outputEntity.getFirstName().equals(inputEntity.getFirstName()) ||
+                                        !outputEntity.getLastName().equals(inputEntity.getLastName()) ||
+                                        outputEntity.getAge() != inputEntity.getAge() + 1 ||
+                                        outputEntity.getSalary() != inputEntity.getSalary() + 2 ||
+                                        outputEntity.getDifference() != outputEntity.getSalary() - outputEntity.getAge()) {
+                                    throw new RuntimeException("mismatch " + outputEntity + " with " + inputEntity);
+                                }
+                            });
+
+                            // check input data status
+                            inputEntityRepository.findAll().forEach(inputEntity -> {
+                                if (!InputStatus.PROCESSED.equals(inputEntity.getStatus())) {
+                                    throw new RuntimeException("status not processed for " + inputEntity);
+                                }
+                            });
+
+                            return RepeatStatus.FINISHED;
+                        }, transactionManager)
+                        .build())
                 .build();
     }
 
