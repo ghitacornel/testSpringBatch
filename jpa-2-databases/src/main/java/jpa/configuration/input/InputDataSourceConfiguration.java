@@ -34,9 +34,7 @@ class InputDataSourceConfiguration {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driver);
-        if (StringUtils.hasText(schema)) {
-            config.setSchema(schema);
-        }
+        config.setSchema(schema);
         return new HikariDataSource(config);
     }
 
