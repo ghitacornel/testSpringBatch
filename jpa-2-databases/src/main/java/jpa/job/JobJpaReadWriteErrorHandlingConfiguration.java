@@ -68,7 +68,7 @@ class JobJpaReadWriteErrorHandlingConfiguration {
                             return RepeatStatus.FINISHED;
                         }, transactionManager)
                         .build())
-                .start(new StepBuilder("generate dummy data", jobRepository)
+                .next(new StepBuilder("generate dummy data", jobRepository)
                         .tasklet((contribution, chunkContext) -> {
 
                             // generate data
