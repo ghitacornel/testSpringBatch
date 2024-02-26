@@ -42,7 +42,7 @@ class FlywayInitializer {
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(inputDataSource);
-            configuration.setLocationsAsStrings(locations + "/inputDatabase");
+            configuration.setLocationsAsStrings(locations + "/input");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -51,7 +51,7 @@ class FlywayInitializer {
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(outputDataSource);
-            configuration.setLocationsAsStrings(locations + "/outputDatabase");
+            configuration.setLocationsAsStrings(locations + "/output");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
