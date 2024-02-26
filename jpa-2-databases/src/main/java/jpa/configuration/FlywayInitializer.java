@@ -34,7 +34,6 @@ class FlywayInitializer {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(dataSource);
             configuration.setLocationsAsStrings(locations + "/batch");
-            configuration.setSchemas(new String[]{"batch"});
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -44,7 +43,6 @@ class FlywayInitializer {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(inputDataSource);
             configuration.setLocationsAsStrings(locations + "/input");
-            configuration.setSchemas(new String[]{"input"});
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -54,7 +52,6 @@ class FlywayInitializer {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(outputDataSource);
             configuration.setLocationsAsStrings(locations + "/output");
-            configuration.setSchemas(new String[]{"output"});
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
