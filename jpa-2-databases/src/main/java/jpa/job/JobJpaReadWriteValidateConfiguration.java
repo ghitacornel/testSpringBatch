@@ -12,7 +12,6 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -49,14 +48,6 @@ class JobJpaReadWriteValidateConfiguration {
         reader.setQueryString("select t from InputEntity t");
         reader.setEntityManagerFactory(inputEntityManager);
         reader.setPageSize(1000);
-
-        ItemWriter<ProcessResult> writer = items -> {
-            for (ProcessResult item : items) {
-                // really BAD idea to write back in the INPUT data source
-                inputEntityRepository.save(item.getInput());
-                outputEntityRepository.save(item.getOutput());
-            }
-        };
 
         return new JobBuilder("jobJpaReadWriteValidate", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -107,7 +98,13 @@ class JobJpaReadWriteValidateConfiguration {
                         })
 
                         // writer/LOAD
-                        .writer(writer)
+                        .writer(items -> {
+                            for (ProcessResult item : items) {
+                                // really BAD idea to write back in the INPUT data source
+                                inputEntityRepository.save(item.getInput());
+                                outputEntityRepository.save(item.getOutput());
+                            }
+                        })
                         .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
                         .build())
                 .next(new StepBuilder("verifyDatabaseStep", jobRepository)
@@ -122,7 +119,8 @@ class JobJpaReadWriteValidateConfiguration {
 
                             // check data
                             List<OutputEntity> outputEntities = outputEntityRepository.findAll();
-                            Map<Integer, InputEntity> map = inputEntities.stream().collect(Collectors.toMap(InputEntity::getId, Function.identity()));
+                            Map<Integer, InputEntity> map = inputEntities.stream()
+                                    .collect(Collectors.toMap(InputEntity::getId, Function.identity()));
                             outputEntities.forEach(outputEntity -> {
                                 InputEntity inputEntity = map.get(outputEntity.getId());
                                 if (inputEntity == null) {
