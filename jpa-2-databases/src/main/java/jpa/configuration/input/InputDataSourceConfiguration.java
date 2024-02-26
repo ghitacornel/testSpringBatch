@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 
@@ -33,7 +34,9 @@ class InputDataSourceConfiguration {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driver);
-        config.setSchema("input");
+        if (StringUtils.hasText(schema)) {
+            config.setSchema(schema);
+        }
         return new HikariDataSource(config);
     }
 
