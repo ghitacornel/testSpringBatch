@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.ClassicConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
@@ -23,13 +24,16 @@ class FlywayInitializer {
     @Qualifier("outputDataSource")
     private final DataSource outputDataSource;
 
+    @Value("${flyway.locations}")
+    private String locations;
+
     @PostConstruct
     void migrateFlyway() {
 
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(dataSource);
-            configuration.setLocationsAsStrings("db/migration/batch");
+            configuration.setLocationsAsStrings(locations + "/batch");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -38,7 +42,7 @@ class FlywayInitializer {
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(inputDataSource);
-            configuration.setLocationsAsStrings("db/migration/inputDatabase");
+            configuration.setLocationsAsStrings(locations + "/inputDatabase");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
@@ -47,7 +51,7 @@ class FlywayInitializer {
         {
             ClassicConfiguration configuration = new ClassicConfiguration();
             configuration.setDataSource(outputDataSource);
-            configuration.setLocationsAsStrings("db/migration/outputDatabase");
+            configuration.setLocationsAsStrings(locations + "/outputDatabase");
             configuration.setBaselineOnMigrate(true);
             Flyway flyway = new Flyway(configuration);
             flyway.migrate();
