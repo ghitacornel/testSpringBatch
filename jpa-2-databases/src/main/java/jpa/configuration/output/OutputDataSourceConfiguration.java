@@ -23,6 +23,9 @@ class OutputDataSourceConfiguration {
     @Value("${spring.datasource.output.driver}")
     private String driver;
 
+    @Value("${spring.datasource.output.schema}")
+    private String schema;
+
     @Bean
     DataSource outputDataSource() {
         HikariConfig config = new HikariConfig();
@@ -30,7 +33,7 @@ class OutputDataSourceConfiguration {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driver);
-        config.setSchema("output");
+        config.setSchema(schema);
         return new HikariDataSource(config);
     }
 

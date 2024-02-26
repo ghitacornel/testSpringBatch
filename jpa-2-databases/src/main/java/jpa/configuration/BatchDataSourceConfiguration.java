@@ -24,6 +24,9 @@ class BatchDataSourceConfiguration {
     @Value("${spring.datasource.batch.driver}")
     private String driver;
 
+    @Value("${spring.datasource.batch.schema}")
+    private String schema;
+
     // the default data source to be used by Spring Batch
     // Spring batch always needs at least 1 data source
     @Primary
@@ -34,7 +37,7 @@ class BatchDataSourceConfiguration {
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driver);
-        config.setSchema("batch");
+        config.setSchema(schema);
         return new HikariDataSource(config);
     }
 

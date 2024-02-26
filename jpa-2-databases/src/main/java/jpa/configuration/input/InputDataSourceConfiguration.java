@@ -23,6 +23,9 @@ class InputDataSourceConfiguration {
     @Value("${spring.datasource.input.driver}")
     private String driver;
 
+    @Value("${spring.datasource.input.schema}")
+    private String schema;
+
     @Bean
     DataSource inputDataSource() {
         HikariConfig config = new HikariConfig();
