@@ -2,7 +2,9 @@ package jpa.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,12 +27,16 @@ public class JobsController {
     @Qualifier("jobSingleThread")
     private final Job jobSingleThread;
 
-    private final JobOperator jobOperator;
+    private final JobLauncher jobLauncher;
 
     @GetMapping("jobJpaReadWriteErrorHandling")
     public void jobJpaReadWriteErrorHandling() {
         try {
-            jobOperator.startNextInstance(jobJpaReadWriteErrorHandling.getName());
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("timestamp", System.currentTimeMillis())
+                    .addLong("count", 10000L)
+                    .toJobParameters();
+            jobLauncher.run(jobJpaReadWriteErrorHandling, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -39,7 +45,11 @@ public class JobsController {
     @GetMapping("jobJpaReadWritePerformanceMultipleThreads")
     public void jobJpaReadWritePerformanceMultipleThreads() {
         try {
-            jobOperator.startNextInstance(jobJpaReadWritePerformanceMultipleThreads.getName());
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("timestamp", System.currentTimeMillis())
+                    .addLong("count", 10000L)
+                    .toJobParameters();
+            jobLauncher.run(jobJpaReadWritePerformanceMultipleThreads, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -48,7 +58,11 @@ public class JobsController {
     @GetMapping("jobJpaReadWriteValidate")
     public void jobJpaReadWriteValidate() {
         try {
-            jobOperator.startNextInstance(jobJpaReadWriteValidate.getName());
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("timestamp", System.currentTimeMillis())
+                    .addLong("count", 10000L)
+                    .toJobParameters();
+            jobLauncher.run(jobJpaReadWriteValidate, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -57,7 +71,11 @@ public class JobsController {
     @GetMapping("jobSingleThread")
     public void jobSingleThread() {
         try {
-            jobOperator.startNextInstance(jobSingleThread.getName());
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("timestamp", System.currentTimeMillis())
+                    .addLong("count", 10000L)
+                    .toJobParameters();
+            jobLauncher.run(jobSingleThread, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
