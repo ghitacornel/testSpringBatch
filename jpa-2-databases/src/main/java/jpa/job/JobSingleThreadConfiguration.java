@@ -13,6 +13,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
@@ -28,6 +29,8 @@ class JobSingleThreadConfiguration {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
+
+    @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
 
     @Bean

@@ -33,6 +33,8 @@ class JobJpaReadWriteValidateConfiguration {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
+
+    @Qualifier("transactionManager")
     private final PlatformTransactionManager transactionManager;
 
     @Qualifier("inputEntityManager")
