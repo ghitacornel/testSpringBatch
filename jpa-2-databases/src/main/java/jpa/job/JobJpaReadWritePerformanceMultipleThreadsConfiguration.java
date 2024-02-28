@@ -36,9 +36,6 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
     @Qualifier("inputEntityManager")
     private final EntityManagerFactory inputEntityManager;
 
-    @Qualifier("outputEntityManager")
-    private final EntityManagerFactory outputEntityManager;
-
     @Bean
     Job jobJpaReadWritePerformanceMultipleThreads() {
 
