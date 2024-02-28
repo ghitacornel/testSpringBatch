@@ -30,7 +30,7 @@ public class JobsController {
     }
 
     @GetMapping("singleThread")
-    public void singleThread(@RequestParam(value = "count", defaultValue = "10000") long count) {
+    public void singleThread(@RequestParam(value = "count", defaultValue = "10") long count) {
         jobsService.singleThread(count);
     }
 

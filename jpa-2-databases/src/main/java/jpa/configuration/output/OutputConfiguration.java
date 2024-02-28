@@ -27,7 +27,7 @@ class OutputConfiguration {
     @Bean
     LocalContainerEntityManagerFactoryBean outputEntityManager(@Qualifier("outputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
-        map.put("hibernate.show_sql", "false");
+        map.put("hibernate.show_sql", "true");
         map.put("hibernate.format_sql", "false");
         map.put("javax.persistence.schema-generation.database.action", action);
         return builder
