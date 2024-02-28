@@ -12,16 +12,13 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
-import org.springframework.batch.item.database.JpaItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.interceptor.TransactionAttribute;
 
 import java.util.List;
 
@@ -44,14 +41,6 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
 
     @Bean
     Job jobJpaReadWritePerformanceMultipleThreads() {
-        // only a count is performed as validation
-
-        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
-        reader.setQueryString("select t from InputEntity t order by id");
-        reader.setEntityManagerFactory(inputEntityManager);
-        reader.setPageSize(1000);
-        reader.setSaveState(false);
-
 
         return new JobBuilder("jobJpaReadWritePerformanceMultipleThreads", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -77,7 +66,12 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
                         .build())
                 .next(new StepBuilder("processingStep", jobRepository)
                         .<InputEntity, OutputEntity>chunk(1000, transactionManager)
-                        .reader(reader)
+                        .reader(new JpaPagingItemReaderBuilder<InputEntity>()
+                                .queryString("select t from InputEntity t order by id")
+                                .entityManagerFactory(inputEntityManager)
+                                .pageSize(1000)
+                                .saveState(false)
+                                .build())
                         .processor(input -> {
                             OutputEntity output = new OutputEntity();
                             output.setId(input.getId());
