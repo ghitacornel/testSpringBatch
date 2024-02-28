@@ -30,7 +30,7 @@ class InputConfiguration {
     @Bean
     LocalContainerEntityManagerFactoryBean inputEntityManager(@Qualifier("inputDataSource") DataSource dataSource, EntityManagerFactoryBuilder builder) {
         Map<String, String> map = new HashMap<>();
-        map.put("hibernate.show_sql", "true");
+        map.put("hibernate.show_sql", "false");
         map.put("hibernate.format_sql", "false");
         map.put("javax.persistence.schema-generation.database.action", action);
         return builder
