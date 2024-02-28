@@ -1,5 +1,6 @@
 package jpa.configuration.output;
 
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
@@ -16,7 +18,8 @@ import java.util.Map;
 @Configuration
 @EnableJpaRepositories(
         entityManagerFactoryRef = "outputEntityManager",
-        basePackages = {"jpa.configuration.output"}
+        basePackages = {"jpa.configuration.output"},
+        transactionManagerRef = "outputTransactionManager"
 )
 @DependsOn({"flywayInitializer"})
 class OutputConfiguration {
@@ -36,6 +39,11 @@ class OutputConfiguration {
                 .persistenceUnit("outputPU")
                 .properties(map)
                 .build();
+    }
+
+    @Bean
+    JpaTransactionManager outputTransactionManager(@Qualifier("outputEntityManager") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
     }
 
 }

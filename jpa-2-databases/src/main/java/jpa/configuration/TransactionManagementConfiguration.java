@@ -8,20 +8,8 @@ import org.springframework.data.transaction.ChainedTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.persistence.EntityManagerFactory;
-
 @Configuration
 class TransactionManagementConfiguration {
-
-    @Bean
-    JpaTransactionManager inputTransactionManager(@Qualifier("inputEntityManager") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
-
-    @Bean
-    JpaTransactionManager outputTransactionManager(@Qualifier("outputEntityManager") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
 
     @Primary
     @Bean
