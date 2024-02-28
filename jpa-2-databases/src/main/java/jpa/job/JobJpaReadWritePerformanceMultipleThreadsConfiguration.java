@@ -11,14 +11,17 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.interceptor.TransactionAttribute;
 
 import java.util.List;
 
@@ -49,9 +52,6 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
         reader.setPageSize(1000);
         reader.setSaveState(false);
 
-        JpaItemWriter<OutputEntity> writer = new JpaItemWriter<>();
-        writer.setEntityManagerFactory(outputEntityManager);
-        writer.setUsePersist(true);
 
         return new JobBuilder("jobJpaReadWritePerformanceMultipleThreads", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -88,7 +88,9 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
                             output.setDifference(output.getSalary() - output.getAge());
                             return output;
                         })
-                        .writer(writer)
+                        .writer(new RepositoryItemWriterBuilder<OutputEntity>()
+                                .repository(outputEntityRepository)
+                                .build())
                         .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
                         .build())
                 .next(new StepBuilder("verifyDatabaseStep", jobRepository)
