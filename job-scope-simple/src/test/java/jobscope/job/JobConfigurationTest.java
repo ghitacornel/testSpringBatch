@@ -1,11 +1,12 @@
 package jobscope.job;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class JobConfigurationTest {
@@ -24,7 +25,7 @@ class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.jobscope.JobConfiguration");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.jobscope.JobConfiguration", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
     }
 }

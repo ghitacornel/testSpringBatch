@@ -1,7 +1,6 @@
 package csv.job;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -17,6 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 public class JobConfigurationTest {
@@ -58,22 +60,22 @@ public class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.JobConfiguration");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.csv.JobConfiguration", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
         // test step
         StepExecution stepExecution = stepExecutionIterator.next();
-        Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.JobConfiguration.step");
-        Assertions.assertEquals(stepExecution.getReadCount(), 1008);
-        Assertions.assertEquals(stepExecution.getWriteCount(), 1000);
-        Assertions.assertEquals(stepExecution.getFilterCount(), 8);
-        Assertions.assertEquals(stepExecution.getCommitCount(), 11);
+        assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+        assertEquals("main.jobs.csv.JobConfiguration.step", stepExecution.getStepName());
+        assertEquals(1008, stepExecution.getReadCount());
+        assertEquals(1000, stepExecution.getWriteCount());
+        assertEquals(8, stepExecution.getFilterCount());
+        assertEquals(11, stepExecution.getCommitCount());
 
         // no more steps
-        Assertions.assertFalse(stepExecutionIterator.hasNext());
+        assertFalse(stepExecutionIterator.hasNext());
 
     }
 }

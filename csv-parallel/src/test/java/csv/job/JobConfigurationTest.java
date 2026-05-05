@@ -1,7 +1,6 @@
 package csv.job;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,6 +18,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class JobConfigurationTest {
@@ -51,16 +52,16 @@ class JobConfigurationTest {
         for (String line : Files.readAllLines(output)) {
             outputIds.add(line.split(",")[0]);
         }
-        Assertions.assertTrue(output.toFile().exists());
-        Assertions.assertTrue(inputIds.containsAll(outputIds));
+        assertTrue(output.toFile().exists());
+        assertTrue(inputIds.containsAll(outputIds));
         outputIds.add("id");
         outputIds.add("5");
         outputIds.add("10");
         outputIds.add("15");
         outputIds.add("20");
         outputIds.add("25");
-        Assertions.assertTrue(inputIds.containsAll(outputIds));
-        Assertions.assertTrue(outputIds.containsAll(inputIds));
+        assertTrue(inputIds.containsAll(outputIds));
+        assertTrue(outputIds.containsAll(inputIds));
     }
 
     @Test
@@ -77,22 +78,22 @@ class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.parallel.JobConfiguration");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.csv.parallel.JobConfiguration", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
         // test step
         StepExecution stepExecution = stepExecutionIterator.next();
-        Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-        Assertions.assertEquals(stepExecution.getStepName(), "main.jobs.csv.parallel.JobConfiguration.step");
-        Assertions.assertEquals(stepExecution.getReadCount(), 1000);
-        Assertions.assertEquals(stepExecution.getWriteCount(), 995);
-        Assertions.assertEquals(stepExecution.getFilterCount(), 5);
-        Assertions.assertEquals(stepExecution.getCommitCount(), 104);
+        assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+        assertEquals("main.jobs.csv.parallel.JobConfiguration.step", stepExecution.getStepName());
+        assertEquals(1000, stepExecution.getReadCount());
+        assertEquals(995, stepExecution.getWriteCount());
+        assertEquals(5, stepExecution.getFilterCount());
+        assertEquals(104, stepExecution.getCommitCount());
 
         // no more steps
-        Assertions.assertFalse(stepExecutionIterator.hasNext());
+        assertFalse(stepExecutionIterator.hasNext());
 
     }
 }

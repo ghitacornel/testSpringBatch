@@ -1,6 +1,5 @@
 package csv.job;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.*;
@@ -10,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class JobConfigurationTest {
@@ -38,8 +39,8 @@ class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.csv.performance.JobDefinition");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.csv.performance.JobDefinition", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
     }
 }

@@ -1,6 +1,5 @@
 package decider.job;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -8,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Iterator;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class JobConfigurationTest {
@@ -32,33 +33,33 @@ class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobConfiguration");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.decider.JobConfiguration", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
         // test step
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step1");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step1", stepExecution.getStepName());
         }
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step2");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step2", stepExecution.getStepName());
         }
 
         // no more steps
-        Assertions.assertFalse(stepExecutionIterator.hasNext());
+        assertFalse(stepExecutionIterator.hasNext());
 
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step1"), "step1");
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step2"), "step2");
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step3"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step31"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step4"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step41"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step42"));
+        assertEquals("step1", jobExecution.getExecutionContext().getString("step1"));
+        assertEquals("step2", jobExecution.getExecutionContext().getString("step2"));
+        assertNull(jobExecution.getExecutionContext().get("step3"));
+        assertNull(jobExecution.getExecutionContext().get("step31"));
+        assertNull(jobExecution.getExecutionContext().get("step4"));
+        assertNull(jobExecution.getExecutionContext().get("step41"));
+        assertNull(jobExecution.getExecutionContext().get("step42"));
 
     }
 
@@ -75,38 +76,38 @@ class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobConfiguration");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.decider.JobConfiguration", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
         // test step
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step1");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step1", stepExecution.getStepName());
         }
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step3");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step3", stepExecution.getStepName());
         }
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step31");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step31", stepExecution.getStepName());
         }
 
         // no more steps
-        Assertions.assertFalse(stepExecutionIterator.hasNext());
+        assertFalse(stepExecutionIterator.hasNext());
 
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step1"), "step1");
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step2"));
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step3"), "step3");
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step31"), "step31");
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step4"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step41"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step42"));
+        assertEquals("step1", jobExecution.getExecutionContext().getString("step1"));
+        assertNull(jobExecution.getExecutionContext().get("step2"));
+        assertEquals("step3", jobExecution.getExecutionContext().getString("step3"));
+        assertEquals("step31", jobExecution.getExecutionContext().getString("step31"));
+        assertNull(jobExecution.getExecutionContext().get("step4"));
+        assertNull(jobExecution.getExecutionContext().get("step41"));
+        assertNull(jobExecution.getExecutionContext().get("step42"));
     }
 
     @Test
@@ -122,43 +123,43 @@ class JobConfigurationTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "main.jobs.decider.JobConfiguration");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("main.jobs.decider.JobConfiguration", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
         Iterator<StepExecution> stepExecutionIterator = jobExecution.getStepExecutions().iterator();
 
         // test step
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step1");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step1", stepExecution.getStepName());
         }
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step4");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step4", stepExecution.getStepName());
         }
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step41");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step41", stepExecution.getStepName());
         }
         {
             StepExecution stepExecution = stepExecutionIterator.next();
-            Assertions.assertEquals(stepExecution.getExitStatus(), ExitStatus.COMPLETED);
-            Assertions.assertEquals(stepExecution.getStepName(), "step42");
+            assertEquals(ExitStatus.COMPLETED, stepExecution.getExitStatus());
+            assertEquals("step42", stepExecution.getStepName());
         }
 
         // no more steps
-        Assertions.assertFalse(stepExecutionIterator.hasNext());
+        assertFalse(stepExecutionIterator.hasNext());
 
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step1"), "step1");
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step2"));
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step3"), "step3");
-        Assertions.assertNull(jobExecution.getExecutionContext().get("step31"), "step31");
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step4"), "step4");
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step41"), "step41");
-        Assertions.assertEquals(jobExecution.getExecutionContext().getString("step42"), "step42");
+        assertEquals("step1", jobExecution.getExecutionContext().getString("step1"));
+        assertNull(jobExecution.getExecutionContext().get("step2"));
+        assertNull(jobExecution.getExecutionContext().get("step3"), "step3");
+        assertNull(jobExecution.getExecutionContext().get("step31"), "step31");
+        assertEquals("step4", jobExecution.getExecutionContext().getString("step4"));
+        assertEquals("step41", jobExecution.getExecutionContext().getString("step41"));
+        assertEquals("step42", jobExecution.getExecutionContext().getString("step42"));
 
     }
 

@@ -1,12 +1,13 @@
 package jpa.job;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class JobJpaReadWritePerformanceSingleThreadTest {
@@ -31,8 +32,8 @@ class JobJpaReadWritePerformanceSingleThreadTest {
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
 
-        Assertions.assertEquals(jobInstance.getJobName(), "jobSingleThread");
-        Assertions.assertEquals(exitStatus.getExitCode(), "COMPLETED");
+        assertEquals("jobSingleThread", jobInstance.getJobName());
+        assertEquals("COMPLETED", exitStatus.getExitCode());
 
     }
 }
