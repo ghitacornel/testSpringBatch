@@ -55,7 +55,7 @@ class JobDefinition {
         return new StepBuilder("main.jobs.csv.performance.JobDefinition.createData", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("inputPath");
-                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
+                    long count = (long) chunkContext.getStepContext().getJobParameters().getOrDefault("count", 0L);
                     List<String> list = InputGenerator.generate(count);
                     FileWriter file = new FileWriter(inputPath);
                     for (String s : list) {
@@ -72,7 +72,7 @@ class JobDefinition {
         return new StepBuilder("main.jobs.csv.performance.JobDefinition.verifyFile", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     String inputPath = (String) chunkContext.getStepContext().getJobParameters().get("outputPath");
-                    long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
+                    long count = (long) chunkContext.getStepContext().getJobParameters().getOrDefault("count", 0L);
                     List<String> allLines = Files.readAllLines(Paths.get(inputPath));
                     if (allLines.size() != count) {
                         throw new RuntimeException("expected " + count + " found " + allLines.size());
