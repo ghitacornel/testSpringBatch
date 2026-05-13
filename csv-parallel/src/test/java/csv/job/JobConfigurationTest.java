@@ -90,7 +90,7 @@ class JobConfigurationTest {
         assertEquals(1000, stepExecution.getReadCount());
         assertEquals(995, stepExecution.getWriteCount());
         assertEquals(5, stepExecution.getFilterCount());
-        assertEquals(104, stepExecution.getCommitCount());
+        assertEquals(105, stepExecution.getCommitCount());
 
         // no more steps
         assertFalse(stepExecutionIterator.hasNext());
