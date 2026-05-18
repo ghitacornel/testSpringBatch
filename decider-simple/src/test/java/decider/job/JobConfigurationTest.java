@@ -2,7 +2,13 @@ package decider.job;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -14,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JobConfigurationTest {
 
     @Autowired
-    JobLauncher jobLauncher;
+    JobOperator jobOperator;
 
     @Autowired
     Job job;
@@ -23,12 +29,11 @@ class JobConfigurationTest {
     void testJobPath2() throws Exception {
 
         JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("timestamp", System.currentTimeMillis())
                 .addString("path", "2")
                 .toJobParameters();
 
 
-        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+        JobExecution jobExecution = jobOperator.start(job, jobParameters);
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
@@ -67,11 +72,10 @@ class JobConfigurationTest {
     void testJobPath3() throws Exception {
 
         JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("timestamp", System.currentTimeMillis())
                 .addString("path", "3")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+        JobExecution jobExecution = jobOperator.start(job, jobParameters);
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();
@@ -114,11 +118,10 @@ class JobConfigurationTest {
     void testJobPath4() throws Exception {
 
         JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("timestamp", System.currentTimeMillis())
                 .addString("path", "4")
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+        JobExecution jobExecution = jobOperator.start(job, jobParameters);
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();

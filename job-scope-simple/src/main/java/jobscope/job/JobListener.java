@@ -1,9 +1,9 @@
 package jobscope.job;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
 @Component

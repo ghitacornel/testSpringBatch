@@ -7,18 +7,16 @@ import jpa.configuration.input.repository.InputEntityRepository;
 import jpa.configuration.output.entity.OutputEntity;
 import jpa.configuration.output.repository.OutputEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,6 @@ class JobJpaReadWriteValidateConfiguration {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
-    private final PlatformTransactionManager transactionManager;
 
     @Qualifier("inputEntityManager")
     private final EntityManagerFactory inputEntityManager;
@@ -44,22 +41,20 @@ class JobJpaReadWriteValidateConfiguration {
     @Bean
     Job jobJpaReadWriteValidate() {
 
-        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
+        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>(inputEntityManager);
         reader.setQueryString("select t from InputEntity t");
-        reader.setEntityManagerFactory(inputEntityManager);
         reader.setPageSize(1000);
 
         return new JobBuilder("jobJpaReadWriteValidate", jobRepository)
-                .incrementer(new RunIdIncrementer())
                 .start(new StepBuilder("clean databases", jobRepository)
-                        .tasklet((contribution, chunkContext) -> {
+                        .tasklet((_, _) -> {
                             inputEntityRepository.deleteAll();
                             outputEntityRepository.deleteAll();
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("generate dummy data", jobRepository)
-                        .tasklet((contribution, chunkContext) -> {
+                        .tasklet((_, chunkContext) -> {
 
                             // generate data
                             long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -69,12 +64,12 @@ class JobJpaReadWriteValidateConfiguration {
                             inputEntityRepository.saveAll(inputEntities);
 
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("processingStep", jobRepository)
 
                         // larger is faster but requires more memory
-                        .<InputEntity, ProcessResult>chunk(1000, transactionManager)
+                        .<InputEntity, ProcessResult>chunk(1000)
 
                         // reader/EXTRACT
                         .reader(reader)
@@ -109,7 +104,7 @@ class JobJpaReadWriteValidateConfiguration {
                         .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
                         .build())
                 .next(new StepBuilder("verifyDatabaseStep", jobRepository)
-                        .tasklet((contribution1, chunkContext1) -> {
+                        .tasklet((_, chunkContext1) -> {
 
                             // check count
                             long actualCount = outputEntityRepository.count();
@@ -144,7 +139,7 @@ class JobJpaReadWriteValidateConfiguration {
                             });
 
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .build();
     }

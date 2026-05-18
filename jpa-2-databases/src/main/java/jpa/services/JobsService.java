@@ -1,10 +1,10 @@
 package jpa.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class JobsService {
     @Qualifier("jobSingleThread")
     private final Job jobSingleThread;
 
-    private final JobLauncher jobLauncher;
+    private final JobOperator jobOperator;
 
     @Async
     public void jpaReadWriteErrorHandling(long count) {
@@ -34,7 +34,7 @@ public class JobsService {
                     .addLong("timestamp", System.currentTimeMillis())
                     .addLong("count", count)
                     .toJobParameters();
-            jobLauncher.run(jobJpaReadWriteErrorHandling, jobParameters);
+            jobOperator.start(jobJpaReadWriteErrorHandling, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -47,7 +47,7 @@ public class JobsService {
                     .addLong("timestamp", System.currentTimeMillis())
                     .addLong("count", count)
                     .toJobParameters();
-            jobLauncher.run(jobJpaReadWritePerformanceMultipleThreads, jobParameters);
+            jobOperator.start(jobJpaReadWritePerformanceMultipleThreads, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +60,7 @@ public class JobsService {
                     .addLong("timestamp", System.currentTimeMillis())
                     .addLong("count", count)
                     .toJobParameters();
-            jobLauncher.run(jobJpaReadWriteValidate, jobParameters);
+            jobOperator.start(jobJpaReadWriteValidate, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -73,7 +73,7 @@ public class JobsService {
                     .addLong("timestamp", System.currentTimeMillis())
                     .addLong("count", count)
                     .toJobParameters();
-            jobLauncher.run(jobSingleThread, jobParameters);
+            jobOperator.start(jobSingleThread, jobParameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

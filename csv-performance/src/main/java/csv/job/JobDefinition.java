@@ -1,32 +1,32 @@
 package csv.job;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.batch.repeat.RepeatStatus;
+
+import org.springframework.batch.infrastructure.item.ItemProcessor;
+import org.springframework.batch.infrastructure.item.ItemReader;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.file.FlatFileItemReader;
+import org.springframework.batch.infrastructure.item.file.FlatFileItemWriter;
+import org.springframework.batch.infrastructure.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.infrastructure.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.infrastructure.item.file.transform.BeanWrapperFieldExtractor;
+import org.springframework.batch.infrastructure.item.file.transform.DelimitedLineAggregator;
+import org.springframework.batch.infrastructure.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -39,12 +39,10 @@ import java.util.concurrent.Executors;
 class JobDefinition {
 
     private final JobRepository jobRepository;
-    private final PlatformTransactionManager transactionManager;
 
     @Bean
     Job job(@Qualifier("step") Step step) {
         return new JobBuilder("main.jobs.csv.performance.JobDefinition", jobRepository)
-                .incrementer(new RunIdIncrementer())
                 .start(createData())
                 .next(step)
                 .next(verifyFile())
@@ -64,7 +62,7 @@ class JobDefinition {
                     file.flush();
                     file.close();
                     return RepeatStatus.FINISHED;
-                }, transactionManager)
+                })
                 .build();
     }
 
@@ -78,14 +76,14 @@ class JobDefinition {
                         throw new RuntimeException("expected " + count + " found " + allLines.size());
                     }
                     return RepeatStatus.FINISHED;
-                }, transactionManager)
+                })
                 .build();
     }
 
     @Bean
     Step step(ItemReader<InputData> reader, ItemProcessor<InputData, OutputData> processor, ItemWriter<OutputData> writer) {
         return new StepBuilder("main.jobs.csv.performance.JobDefinition.step", jobRepository)
-                .<InputData, OutputData>chunk(1000, transactionManager)// larger is faster but requires more memory
+                .<InputData, OutputData>chunk(1000)// larger is faster but requires more memory
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
@@ -111,44 +109,41 @@ class JobDefinition {
     @Bean
     @StepScope
     FlatFileItemReader<InputData> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
-        FlatFileItemReader<InputData> reader = new FlatFileItemReader<>();
-        reader.setResource(new FileSystemResource(inputPath));
-        reader.setLineMapper(new DefaultLineMapper<>() {
-            {
-                setLineTokenizer(new DelimitedLineTokenizer() {
+        return new FlatFileItemReader<>(
+                new FileSystemResource(inputPath),
+                new DefaultLineMapper<>() {
                     {
-                        setNames("id", "firstName", "lastName", "age", "salary");
+                        setLineTokenizer(new DelimitedLineTokenizer() {
+                            {
+                                setNames("id", "firstName", "lastName", "age", "salary");
+                            }
+                        });
+                        setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
+                            {
+                                setTargetType(InputData.class);
+                            }
+                        });
                     }
                 });
-                setFieldSetMapper(new BeanWrapperFieldSetMapper<>() {
-                    {
-                        setTargetType(InputData.class);
-                    }
-                });
-            }
-        });
-        return reader;
     }
 
     @Bean
     @StepScope
     FlatFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
-        FlatFileItemWriter<OutputData> writer = new FlatFileItemWriter<>();
-        writer.setResource(new FileSystemResource(outputPath));
-        writer.setAppendAllowed(false);
-        writer.setLineAggregator(new DelimitedLineAggregator<>() {
-            {
-                setFieldExtractor(new BeanWrapperFieldExtractor<>() {
+        return new FlatFileItemWriter<>(
+                new FileSystemResource(outputPath),
+                new DelimitedLineAggregator<>() {
                     {
-                        setNames(new String[]{"id", "firstName", "lastName", "age", "salary", "difference"});
+                        setFieldExtractor(new BeanWrapperFieldExtractor<>() {
+                            {
+                                setNames(new String[]{"id", "firstName", "lastName", "age", "salary", "difference"});
+                            }
+                        });
                     }
                 });
-            }
-        });
-        return writer;
     }
 
-    private TaskExecutor taskExecutor() {
+    private AsyncTaskExecutor taskExecutor() {
         return new ConcurrentTaskExecutor(Executors.newFixedThreadPool(10));
     }
 

@@ -9,19 +9,17 @@ import jpa.configuration.output.entity.OutputEntity;
 import jpa.configuration.output.repository.OutputEntityRepository;
 import jpa.exception.SpecificException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +31,6 @@ class JobJpaReadWriteErrorHandlingConfiguration {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
-    private final PlatformTransactionManager transactionManager;
 
     @Qualifier("inputEntityManager")
     private final EntityManagerFactory inputEntityManager;
@@ -44,9 +41,8 @@ class JobJpaReadWriteErrorHandlingConfiguration {
     @Bean
     Job jobJpaReadWriteErrorHandling() {
 
-        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>();
+        JpaPagingItemReader<InputEntity> reader = new JpaPagingItemReader<>(inputEntityManager);
         reader.setQueryString("select t from InputEntity t");
-        reader.setEntityManagerFactory(inputEntityManager);
         reader.setPageSize(1000);
 
         ItemWriter<ProcessResult> writer = items -> {
@@ -60,16 +56,15 @@ class JobJpaReadWriteErrorHandlingConfiguration {
         };
 
         return new JobBuilder("jobJpaReadWriteErrorHandling", jobRepository)
-                .incrementer(new RunIdIncrementer())
                 .start(new StepBuilder("clean databases", jobRepository)
-                        .tasklet((contribution, chunkContext) -> {
+                        .tasklet((_, _) -> {
                             inputEntityRepository.deleteAll();
                             outputEntityRepository.deleteAll();
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("generate dummy data", jobRepository)
-                        .tasklet((contribution, chunkContext) -> {
+                        .tasklet((_, chunkContext) -> {
 
                             // generate data
                             long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -80,12 +75,12 @@ class JobJpaReadWriteErrorHandlingConfiguration {
                             inputEntityRepository.saveAll(inputEntities);
 
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("processingStep", jobRepository)
-                        .<InputEntity, ProcessResult>chunk(1000, transactionManager)
+                        .<InputEntity, ProcessResult>chunk(1000)
                         .faultTolerant()
-                        .skipPolicy((t, skipCount) -> {
+                        .skipPolicy((t, _) -> {
                             if (t instanceof ConstraintViolationException) return true;
                             if (t instanceof SpecificException) return true;
                             return false;
@@ -121,7 +116,7 @@ class JobJpaReadWriteErrorHandlingConfiguration {
                         .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
                         .build())
                 .next(new StepBuilder("verifyDatabaseStep", jobRepository)
-                        .tasklet((contribution1, chunkContext1) -> {
+                        .tasklet((_, chunkContext1) -> {
 
                             // check count
                             long actualCount = outputEntityRepository.count();
@@ -137,10 +132,10 @@ class JobJpaReadWriteErrorHandlingConfiguration {
                             });
 
                             // item with negative id is not persisted
-                            outputEntityRepository.findById(-100).ifPresent(outputEntity -> {
+                            outputEntityRepository.findById(-100).ifPresent(_ -> {
                                 throw new RuntimeException("id -100 still present");
                             });
-                            outputEntityRepository.findById(100).ifPresent(outputEntity -> {
+                            outputEntityRepository.findById(100).ifPresent(_ -> {
                                 throw new RuntimeException("id 100 still present");
                             });
 
@@ -156,7 +151,7 @@ class JobJpaReadWriteErrorHandlingConfiguration {
                             });
 
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .build();
     }

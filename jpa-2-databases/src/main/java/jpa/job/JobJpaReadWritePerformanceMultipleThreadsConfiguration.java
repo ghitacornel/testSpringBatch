@@ -6,19 +6,17 @@ import jpa.configuration.input.repository.InputEntityRepository;
 import jpa.configuration.output.entity.OutputEntity;
 import jpa.configuration.output.repository.OutputEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.item.data.builder.RepositoryItemWriterBuilder;
+import org.springframework.batch.infrastructure.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 
@@ -29,7 +27,6 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
     private final JobRepository jobRepository;
     private final InputEntityRepository inputEntityRepository;
     private final OutputEntityRepository outputEntityRepository;
-    private final PlatformTransactionManager transactionManager;
 
     @Qualifier("inputEntityManager")
     private final EntityManagerFactory inputEntityManager;
@@ -38,16 +35,15 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
     Job jobJpaReadWritePerformanceMultipleThreads() {
 
         return new JobBuilder("jobJpaReadWritePerformanceMultipleThreads", jobRepository)
-                .incrementer(new RunIdIncrementer())
                 .start(new StepBuilder("clean databases", jobRepository)
-                        .tasklet((contribution, chunkContext) -> {
+                        .tasklet((_, _) -> {
                             inputEntityRepository.deleteAll();
                             outputEntityRepository.deleteAll();
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("generate dummy data", jobRepository)
-                        .tasklet((contribution, chunkContext) -> {
+                        .tasklet((_, chunkContext) -> {
 
                             // generate data
                             long count = (long) chunkContext.getStepContext().getJobParameters().get("count");
@@ -57,10 +53,10 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
                             inputEntityRepository.saveAll(list);
 
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("processingStep", jobRepository)
-                        .<InputEntity, OutputEntity>chunk(1000, transactionManager)
+                        .<InputEntity, OutputEntity>chunk(1000)
                         .reader(new JpaPagingItemReaderBuilder<InputEntity>()
                                 .queryString("select t from InputEntity t order by id")
                                 .entityManagerFactory(inputEntityManager)
@@ -83,14 +79,14 @@ class JobJpaReadWritePerformanceMultipleThreadsConfiguration {
                         .taskExecutor(new SimpleAsyncTaskExecutor("performanceTaskExecutor"))
                         .build())
                 .next(new StepBuilder("verifyDatabaseStep", jobRepository)
-                        .tasklet((contribution1, chunkContext1) -> {
+                        .tasklet((_, chunkContext1) -> {
                             long actualCount = outputEntityRepository.count();
                             long count1 = (long) chunkContext1.getStepContext().getJobParameters().get("count");
                             if (actualCount != count1) {
                                 throw new RuntimeException("expected " + count1 + " found " + actualCount);
                             }
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .build();
     }

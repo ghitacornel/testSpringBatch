@@ -2,7 +2,11 @@ package jobscope.job;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class JobConfigurationTest {
 
     @Autowired
-    JobLauncher jobLauncher;
+    JobOperator jobOperator;
 
     @Autowired
     Job job;
@@ -20,7 +24,7 @@ class JobConfigurationTest {
     @Test
     void testJob() throws Exception {
 
-        JobExecution jobExecution = jobLauncher.run(job, new JobParameters());
+        JobExecution jobExecution = jobOperator.start(job, new JobParameters());
 
         JobInstance jobInstance = jobExecution.getJobInstance();
         ExitStatus exitStatus = jobExecution.getExitStatus();

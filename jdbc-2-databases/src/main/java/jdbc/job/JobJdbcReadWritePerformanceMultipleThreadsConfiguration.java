@@ -2,23 +2,21 @@ package jdbc.job;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.database.JdbcPagingItemReader;
-import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.support.H2PagingQueryProvider;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.item.database.JdbcPagingItemReader;
+import org.springframework.batch.infrastructure.item.database.Order;
+import org.springframework.batch.infrastructure.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.infrastructure.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.infrastructure.item.database.support.H2PagingQueryProvider;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -40,10 +38,9 @@ class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
     private final DataSource dataSourceHSQL;
 
     private final JobRepository jobRepository;
-    private final PlatformTransactionManager transactionManager;
 
     @Bean
-    Job jobJdbcReadWritePerformanceMultipleThreads() {
+    Job jobJdbcReadWritePerformanceMultipleThreads() throws Exception {
         // only a count is performed as validation
 
         H2PagingQueryProvider queryProvider = new H2PagingQueryProvider();
@@ -71,7 +68,6 @@ class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
         }
 
         return new JobBuilder("jobJdbcReadWritePerformanceMultipleThreads", jobRepository)
-                .incrementer(new RunIdIncrementer())
                 .start(new StepBuilder("createDataStep", jobRepository)
                         .tasklet((contribution, chunkContext) -> {
 
@@ -110,12 +106,12 @@ class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
                             connection.close();
 
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .next(new StepBuilder("processingStep", jobRepository)
 
                         // larger is faster but requires more memory
-                        .<InputDTO, OutputDTO>chunk(1000, transactionManager)
+                        .<InputDTO, OutputDTO>chunk(1000)
 
                         .reader(jdbcPagingItemReader)
 
@@ -151,7 +147,7 @@ class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
                         //job configuration done
                         .build())
                 .next(new StepBuilder("verifyDatabaseStep", jobRepository)
-                        .tasklet((contribution1, chunkContext1) -> {
+                        .tasklet((_, chunkContext1) -> {
                             Connection connection1 = dataSourceHSQL.getConnection();
                             PreparedStatement preparedStatement1 = connection1.prepareStatement("select count(*) from OutputDTO");
                             ResultSet resultSet = preparedStatement1.executeQuery();
@@ -164,7 +160,7 @@ class JobJdbcReadWritePerformanceMultipleThreadsConfiguration {
                                 throw new RuntimeException("expected " + count1 + " found " + actualCount);
                             }
                             return RepeatStatus.FINISHED;
-                        }, transactionManager)
+                        })
                         .build())
                 .build();
     }
